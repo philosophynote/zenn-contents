@@ -80,6 +80,8 @@ class RuleManagementForm
  validates :policy_name, presence: true, length: { maximum: 50 }
  
  delegate :persisted?, to: :rule
+ @form = RuleManagementForm.new
+ # @from.rule.persisted?が@from.persisted?で書けるようになる
  delegate :persisted?, to: :policy
  
  def initialize(attributes = nil, rule: Rule.new, policy: Policy.new)
@@ -203,9 +205,12 @@ class RuleManagementController < ApplicationController
  
 ```
 
+
+
 ### ビュー
 
 ```ruby:app/views/rule_managements/new.html.erb
+# persisted?があることで自動的にPOSTとPATCHに切り替える
 <%= form_with model: rule, local: true do |form| %>
   <%= form.text_field :rule_name %>
   <%= rule.fields_for :read do |read| %>
