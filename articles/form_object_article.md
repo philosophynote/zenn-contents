@@ -1,15 +1,15 @@
 ---
-title: "【備忘録】フォームオブジェクトについて"
+title: "【備忘録】Formオブジェクトについて"
 emoji: "🔖"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: []
-published: false
+topics: ["Rails"]
+published: true
 ---
 
 仕事で孫モデルまでを一回の処理で作成・更新する必要があり、
 汚いコードでなんとか記述しました。
 
-今後はなるべくスマートに記述したいと思い、Form Objectについてまとめることにしました。
+今後はなるべく簡潔に記述したいと思い、Formオブジェクトについてまとめることにしました。
 
 ## Form Objectとは何か？
 
@@ -18,7 +18,7 @@ form_withを使用することで目的が達成されるユースケースを�
 ## 何故使用するのか？
 
 Railsではresourcesメソッドによるリソースベースのルーティングが基本になっています。
-URLで表されるリソースをデータベースのテーブルと一対一に対応させており、これらのCRUD操作を通してユーザーとやり取りすることを想定しています。
+URLで表されるリソースをデータベースのテーブルと１対１に対応させており、これらのCRUD操作を通してユーザーとやり取りすることを想定しています。
 
 しかしながら、次のようなケースではこの考え方だけでは上手くいかないケースに該当します。
 
@@ -29,17 +29,16 @@ URLで表されるリソースをデータベースのテーブルと一対一�
 2. 複数のモデルで登録・更新操作が必要になる場合
  親モデルに操作が行われた場合に子モデルの操作が必要になる場合を考えます。
  この場合`accepts_nested_attributes_for`メソッドが候補になります。
- しかしながらこのメソッドは非常に評判が悪く、使用を禁止している会社もあるとのことです。
+ しかしながらこのメソッドは非常に評判が悪く、使用を禁止している場合もあるとのことです。
 
  <https://zenn.dev/murakamiiii/articles/5ecefb7a58d1ef>
 
  <https://moneyforward.com/engineers_blog/2018/12/15/formobject/>
   
 3. 対応するテーブルが存在しない場合
-　　例えば、Cookieベースのセッションの作成・削除操作のようなユースケースでは対応するモデルが存在しません。他のモデルやコントローラーに処理を実装することもできますが、記述が肥大化してしまいます。
- 他にもElasticSearchへのリクエストなどのケースが想定されます。
+ 例えば、Cookieベースのセッションの作成・削除操作のようなユースケースでは対応するモデルが存在しません。他のモデルやコントローラーに処理を実装することもできますが、記述が肥大化してしまいます。他にもElasticSearchへのリクエストなどのケースが想定されます。
 
-もう少し抽象的に知りたい場合は次の記事が参考になりました。
+もう少し抽象的に表現すると次の記事のように表現されます。
 
 <https://applis.io/posts/rails-design-pattern-form-objects#form%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E5%BF%85%E8%A6%81%E6%80%A7>
 
@@ -48,7 +47,9 @@ URLで表されるリソースをデータベースのテーブルと一対一�
 
 ## 使用例
 
-サービスが複数存在し、ユーザーはサービスの利用の有無を設定するルールを複数所有するケースを考えます。
+孫要素までまとめて保存する例を考えます。
+サービスが複数存在し、
+ユーザーはサービスの権限（読み書き）を設定するルールを複数所有するケースを考えます。
 
 テーブルとER図は次の通りです。
 
@@ -57,25 +58,28 @@ URLで表されるリソースをデータベースのテーブルと一対一�
 | rules | id | interger |
 |  | rule_name  | varchar |
 | authorities | id | interger |
+|  | rule_id  | interger |
 |  | authority  | interger |
+| authority_service_relations | id | interger |
+|  | authority_id   | interger |
+|  | service_id   | interger |
 | services | id | interger |
 |  | service_name   | varchar |
-| policy_service_relations | id | interger |
-|  | policy_id   | interger |
-|  | service_id   | interger |
 
-![](https://storage.googleapis.com/zenn-user-upload/c23fbc0f948a-20221029.png)
+![](https://storage.googleapis.com/zenn-user-upload/5bb765de8b26-20221106.png)
+
+この例はRuby 2.7.5,Ruby on Rails 6.1.6で動作を確認しています。
 
 ### Formオブジェクト
 
-```ruby:app/forms/rule_management_form.rb
+```ruby:app/forms/rule_form.rb
 class RuleForm
  include ActiveModel::Model
  include ActiveModel::Attributes
  
-  attribute :rule_name, :string
-  attribute :read
-  attribute :write
+ attribute :rule_name, :string
+ attribute :read
+ attribute :write
  
  validates :rule_name, presence: true, length: { in: 1..30 }
  
@@ -91,7 +95,6 @@ class RuleForm
   return if invalid?
 
   ActiveRecord::Base.transaction do  
-
 
     rule.authorities.destroy_all
     if read[:services]&.any?
@@ -135,7 +138,7 @@ end
   
 ```
 
-コードについて説明します。
+コードの説明です。
 `include Active::Model`はActiveModelが提供するモジュール郡の一部をまとめたモジュールです。
 複数のモジュールを組み合わせて、コントローラやビューのメソッドとの連携に必要なインターフェースを提供します。
 
@@ -145,24 +148,22 @@ end
 
 <https://railsguides.jp/active_model_basics.html#attributemethods%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AB>
 
-なお、今回のコードはRails5系で確認しております。
+なお、今回のコードはRails6系で確認しております。
 Rails7系では`ActiveModel::Attributes`についても一緒にincludeされるようになりました。
 
 <https://techracho.bpsinc.jp/hachi8833/2022_01_28/114954>
 
 `delegated`は委譲に関するメソッドです。
-ruleモデルから
+ruleモデルから`persisted?`を委譲することでビューからform_withで送信する際に
+自動的にフォームのアクションを`POST`と`PATCH`に切り替えてくれます。
 
-`initialize`はフォームオブジェクトの値を初期化しています。
-`super`はActiveModel::Modelの`initialize`を呼び出しており、書き込みメソッド（`rule_name=`など）を用いて値を代入しています。 つまり、フォームオブジェクトで用いる値は書き込みメソッドを定義する必要があります。
+`initialize`はFormオブジェクトの値を初期化しています。
+こちらについては先ほども引用した次の記事が勉強になりました。
 
-また、更新にも対応する場合は`default_attributes`のように保存済みのレコードをもとに値を設定する必要があります。 更新に対応しない場合は`initialize`を定義する必要はありません。 この場合は`ActiveModel::Model`の`initialize`により自動で値の初期化を行ってくれます。
+[Railsのデザインパターン: Formオブジェクト](https://applis.io/posts/rails-design-pattern-form-objects#formオブジェクト)
 
-値に書き込みメソッドだけでなく読み取りメソッドも定義しているのは、ビューのフォームに必要なためです。 たとえば`form.text_field :rule_name`は`RuleManagementForm#rule_name`から値を取得します。 フォームの内容に応じてメソッドを定義する必要があります。
+`to_model`はビューの表示（`form_with`）に必要なメソッドです。 アクションのURLを適切な場所（ここではrule_pathやrule_path(id)）に切り替えてくれます。
 
-`persisted?`と`to_model`はビューの表示（`form_with`）に必要なメソッドです。 `persisted?`は作成・更新に応じてフォームのアクションをPOST・PATCHに切り替えてくれます。 また`to_model`はアクションのURLを適切な場所（ここではrule_pathやrule_path(id)）に切り替えてくれます。
-
-ActiveRecordモデルと同じく、#validateを用い独自のバリデーションを設定できます。 errorsオブジェクトにエラーを追加すれば、#valid?での検証失敗時にユーザにフィードバックを表示することもできます。
 
 ### コントローラ
 
@@ -283,8 +284,19 @@ class AuthorityServiceRelation < ApplicationRecord
 end
 ```
 
-## 気になった点
+## 感想
 
+Formオブジェクトを作成するとフォームに関する記述が一箇所にまとまるので
+非常に読みやすいです。
+自分で作成した時は一番上のモデル（親モデル）に孫モデルの保存処理まで記述してしまい、
+読みにくくなったので大変ありがたいです。
+
+
+また、`POST`と`PATCH`の切り替えなどは普段はあまり意識しておりませんでしたが、
+自力で実装する体験を通して理解を深めることができました。
+
+一方でRailsに頼るあまり、純粋なRubyのクラスの扱い方に苦戦しました。
+今後はそちらについても理解を深めていきたいと思います。
 ## 参考文献・記事
 
 [パーフェクト Ruby on Rails【増補改訂版】](https://www.amazon.co.jp/%E3%83%91%E3%83%BC%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88-Ruby-Rails-%E3%80%90%E5%A2%97%E8%A3%9C%E6%94%B9%E8%A8%82%E7%89%88%E3%80%91-%E3%81%99%E3%81%8C%E3%82%8F%E3%82%89-%E3%81%BE%E3%81%95%E3%81%AE%E3%82%8A-ebook/dp/B08D3DW7LP/ref=sr_1_1?crid=1GVVRQ00LI7MO&keywords=%E3%83%91%E3%83%BC%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88ruby+on+rails+%E5%A2%97%E8%A3%9C%E6%94%B9%E8%A8%82%E7%89%88&qid=1667008413&qu=eyJxc2MiOiIwLjkwIiwicXNhIjoiMS4wMCIsInFzcCI6IjEuMDAifQ%3D%3D&sprefix=%E3%83%91%E3%83%BC%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88+Ruby%2Caps%2C212&sr=8-1)
