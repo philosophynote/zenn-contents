@@ -69,24 +69,20 @@ URLで表されるリソースをデータベースのテーブルと一対一�
 ### Formオブジェクト
 
 ```ruby:app/forms/rule_management_form.rb
-class RuleManagementForm
- include Active::Model
- include Active::Attributes
+class RuleForm
+ include ActiveModel::Model
+ include ActiveModel::Attributes
  
- attribute :rule_name, :string
- attribute :policy_name, :string
+  attribute :rule_name, :string
+  attribute :read
+  attribute :write
  
  validates :rule_name, presence: true, length: { in: 1..30 }
- validates :policy_name, presence: true, length: { maximum: 50 }
  
  delegate :persisted?, to: :rule
- @form = RuleManagementForm.new
- # @from.rule.persisted?が@from.persisted?で書けるようになる
- delegate :persisted?, to: :policy
  
- def initialize(attributes = nil, rule: Rule.new, policy: Policy.new)
+ def initialize(attributes = nil, rule: Rule.new)
   @rule = rule
-  @policy = policy
   attributes ||= default_attributes
   super(attributes)
  end
@@ -94,30 +90,48 @@ class RuleManagementForm
  def save
   return if invalid?
 
-  ActiveRecord::Base.transaction do
-      survice_ids = 
-      user.update!(user_name: user_name, rule_name: rule_name, survice_ids: survice_ids)
+  ActiveRecord::Base.transaction do  
+
+
+    rule.authorities.destroy_all
+    if read[:services]&.any?
+      read_authority = rule.authorities.build(authority: Authority.authorities[:read] )
+      read[:services].compact_blank!
+      read[:services].each do |read_service|
+        read_authority.authority_service_relations.build(service_id: read_service)
+      end
     end
+    
+    if write[:services]&.any?
+      write_authority = rule.authorities.build(authority: Authority.authorities[:write])
+      write[:services].compact_blank!
+      write[:services].each do |write_service|
+        write_authority.authority_service_relations.build(service_id: write_service)
+      end
+    end
+    rule.update!(rule_name: rule_name)
+  end
+
   rescue ActiveRecord::RecordInvalid
     false
  end
  
  def to_model
-  user
+  rule
  end
  
  private
-  attr_reader :policy
-  
-  def default_attributes
-    {
-      rule_name: rule.rule_name,
-      policy_name: policy.policy_name,
-      policy_level: policy.policy_level,
-      survice_ids: policy.service_ids
-    }
-  end
-  
+
+    attr_reader :rule
+    
+    def default_attributes
+      {
+        rule_name: rule.rule_name,
+        read: { services: rule.authorities.read.joins(:services) },
+        write: { services: rule.authorities.write.joins(:services) },
+      }
+    end
+end  
   
 ```
 
@@ -152,17 +166,21 @@ ActiveRecordモデルと同じく、#validateを用い独自のバリデーシ�
 
 ### コントローラ
 
-```ruby:app/controllers/rule_management_controller.rb
-class RuleManagementController < ApplicationController
+```ruby:app/controllers/rules_controller.rb
+class RulesController < ApplicationController
+  def index
+    @rules = Rule.all
+  end
+
   def new
-    @form = RuleManagementForm.new
+    @form = RuleForm.new
   end
 
   def create
-    @form = RuleManagementForm.new(rule_management_params)
+    @form = RuleForm.new(rule_params)
 
     if @form.save
-      redirect_to rule_managements_path
+      redirect_to rules_path
     else
       render :new
     end
@@ -171,16 +189,15 @@ class RuleManagementController < ApplicationController
   def edit
     load_rule
 
-    @form = RuleManagementForm.new(rule: @rule, )
+    @form = RuleForm.new(rule: @rule)
   end
 
   def update
     load_rule
-
-    @form = RuleManagementForm.new(rule_management_params, rule: @rule)
+    @form = RuleForm.new(rule_params, rule: @rule)
 
     if @form.save
-      redirect_to @rule
+      redirect_to rules_path
     else
       render :edit
     end
@@ -188,39 +205,82 @@ class RuleManagementController < ApplicationController
 
   private
 
-  def rule_management_params
+  def rule_params
     params.require(:rule).permit(:rule_name, 
- read: {
- service_ids: []
- },
- write: {
- service_ids: []
- }
-    )
+      read: {
+        services: []
+        },
+      write: {
+        services: []
+        }
+      )
   end
 
   def load_rule
-    @rule = current_user.rule.find(params[:id])
+    @rule = Rule.find(params[:id])
   end
- 
+end
+
 ```
-
-
 
 ### ビュー
 
-```ruby:app/views/rule_managements/new.html.erb
-# persisted?があることで自動的にPOSTとPATCHに切り替える
-<%= form_with model: rule, local: true do |form| %>
+```ruby:app/views/rules/new.html.erb
+<%= form_with model: @form, local: true do |form| %>
   <%= form.text_field :rule_name %>
-  <%= rule.fields_for :read do |read| %>
-  <%= read.collection_check_boxes :service_ids, Service.ids, :service_ids, :service_name do |service| %>
+  <%= form.fields_for :read do |read| %>
+    <%= read.collection_check_boxes :services, Service.all, :id, :service_name %>
   <% end %>
-  <%= rule.fields_for :write do |write| %>
-  <%= write.collection_check_boxes :service_ids, Service.ids, :service_ids, :service_name do |service| %>
+  <%= form.fields_for :write do |write| %>
+    <%= write.collection_check_boxes :services, Service.all, :id, :service_name %>
   <% end %>
   <%= form.submit %>
 <% end %>
+```
+
+```ruby:app/views/rules/edit.html.erb
+<%= form_with model: @form, local: true do |form| %>
+  <%= form.text_field :rule_name %>
+  <%= form.fields_for :read do |read| %>
+    <%= read.collection_check_boxes :services, Service.all, :id, :service_name,  checked: @form.read[:services].pluck(:service_id) %>
+  <% end %>
+  <%= form.fields_for :write do |write| %>
+    <%= write.collection_check_boxes :services, Service.all, :id, :service_name,  checked: @form.write[:services].pluck(:service_id) %>
+  <% end %>
+  <%= form.submit %>
+<% end %>
+```
+
+### モデル
+
+```ruby:app/models/rule.erb
+class Rule < ApplicationRecord
+  has_many :authorities
+
+  validates :rule_name, presence: true, length: { in: 1..30 }
+end
+```
+
+```ruby:app/models/authority.erb
+class Authority < ApplicationRecord
+  belongs_to :rule
+  has_many :authority_service_relations
+  has_many :services, through: :authority_service_relations
+  enum authority: { read: 1, write: 2 }
+end
+```
+
+```ruby:app/models/service.erb
+class Service < ApplicationRecord
+  has_many :authorities, through: :authority_service_relation
+end
+```
+
+```ruby:app/models/authority_service_relation.erb
+class AuthorityServiceRelation < ApplicationRecord
+  belongs_to :authority
+  belongs_to :service
+end
 ```
 
 ## 気になった点
