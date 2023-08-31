@@ -15,7 +15,7 @@ published: false
 
 例えば、山田さんと中島さんと伊藤さんの３人の年齢を比較してその中で一番年齢が上の人を取得する場合はmax_byメソッドを使用して次のように書けます。
 
-```between_three.rb
+```ruby
   yamada = User.create!(name: "山田", age: 20)
   nakajima = User.create!(name: "中島", age: 40)
   ito = User.create!(name: "伊藤", age: 30)
@@ -24,19 +24,19 @@ published: false
 
 max_byメソッドについては次のリンクを参照してください。
 
-[https://docs.ruby-lang.org/ja/latest/method/Enumerable/i/max_by.html]
+https://docs.ruby-lang.org/ja/latest/method/Enumerable/i/max_by.html
 
 それでは山田さんと中島さんの２人の年齢を比較して、年齢が取得する人の名前を取得する場合はどうでしょうか？
 上の誘導があれば次のように書けます。
 
-```between_two.rb
+```ruby
   max_age_user = [yamada, nakajima].max_by{|user| user.age} # nakajimaが返却される
   max_age_user.name # 中島が返却される
 ```
 
 ところが、実際には次のように書かれるケースがあります。
 
-```if.rb
+```ruby
   if yamada.age > nakajima.age
     max_age_user = yamada
   else
@@ -52,12 +52,14 @@ max_byメソッドについては次のリンクを参照してください。
 
 ### 理由①：可読性が低い
 
-条件分岐を使用すると行数が増えるため、コードの読み手に読解を強いる箇所が増えることになり、認知負荷が高くなります。
+条件分岐を使用すると行数が増えるため、
+コードの読み手に読解を強いる箇所が増えることになり、認知負荷が高くなります。
 
 ### 理由②：拡張性が悪い
 
 条件分岐を使用すると、条件が増えるたびにコードを修正する必要があります。
-if~elseを使用しているとelsifを追加する対応などをした結果、コードが複雑になるケースがあります。
+if~elseを使用しているとelsifを追加する対応などをした結果、
+コードが複雑になるケースがあります。
 
 ２つの理由について実際に遭遇したケースを見ていきます。
 
@@ -67,7 +69,7 @@ if~elseを使用しているとelsifを追加する対応などをした結果�
 純粋に条件分岐のみを修正する可能性があります。
 if~elseを使用した次のコードを考えます。
 
-```join.rb
+```ruby
 
 if hoge.content.present? && fuga.content.present?
   "ホゲ・フガ"
@@ -79,10 +81,11 @@ end
 
 ```
 
-hoge,fugaの2つのオブジェクトがある場合に、それぞれのオブジェクトのcontentが存在する場合には該当する文字列を返却するという処理を行っています。
+hoge,fugaの2つのオブジェクトがある場合に、
+それぞれのオブジェクトのcontentが存在する場合には該当する文字列を返却するという処理を行っています。
 この時点ですでに可読性が低いですが、扱うオブジェクトが増えた場合にこのように書かれるケースがあります。
 
-```join.rb
+```ruby
 
 if hoge.content.present? && fuga.content.present? && piyo.content.present?
   "ホゲ・フガ・ピヨ"
@@ -105,7 +108,7 @@ end
 このようにオブジェクトが増えると、条件分岐の数が増えていきます。
 今回の場合は次のような対応をはじめから考えておくべきでした。
 
-```join.rb
+```ruby
 
 tmp = []
 tmp << "ホゲ" if hoge.content.present?
@@ -118,7 +121,7 @@ tmp.join("・")
 
 次のように条件分岐がネストするケースも考えられます。
 
-```if.rb
+```ruby
   hoge = Hoge.find_by(id: params[:hoge_id])
   fuga = Fuga.find_by(id: params[:fuga_id])
   if hoge.present? && fuga.present?
@@ -140,7 +143,7 @@ tmp.join("・")
 
 このように書けば条件分岐をネストせずに書けます。
 
-```compact.rb
+```ruby
   hoge = Hoge.find_by(id: params[:hoge_id])
   fuga = Fuga.find_by(id: params[:fuga_id])
 
