@@ -35,6 +35,11 @@ Web３層構造
 ローカルの開発環境で開発する際にはunicornは必要ありませんが、
 本番環境では必要になります。
 WEBアプリケーションの構成は開発と本番で次のように異なっています。
+(Real World HTTP P.353,356の図を基に作成)
+
+![開発環境](/images/development.png)
+
+![本番環境](/images/production.png)
 
 この理由はリクエストの数です。
 開発環境と異なり、本番環境では複数のリクエストが同時に来ることが想定されます。
@@ -120,5 +125,7 @@ pumaの方がメモリを効率的に使うことができます。
 （**スレッドセーフ**でない状態）
 
 ## 参考文献、記事
+[Real World HTTP 第2版](https://www.amazon.co.jp/Real-World-HTTP-%E7%AC%AC2%E7%89%88-%E2%80%95%E6%AD%B4%E5%8F%B2%E3%81%A8%E3%82%B3%E3%83%BC%E3%83%89%E3%81%AB%E5%AD%A6%E3%81%B6%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%8D%E3%83%83%E3%83%88%E3%81%A8%E3%82%A6%E3%82%A7%E3%83%96%E6%8A%80%E8%A1%93/dp/4873119030)
+
 [Pumaの本当の力を引き出す](https://qiita.com/ykyk1218/items/0ca7f1fa449b41fe1fea)
 [Railsのアプリケーションサーバーのプロセス数とスレッド数の設定方法](https://tech-book.precena.co.jp/software/backend/ruby-on-rails/rails-process-and-thread)
