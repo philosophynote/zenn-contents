@@ -3,7 +3,7 @@ title: "【イベント参加レポート】Kaigi on Rails 2023"
 emoji: "🛤️"
 type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["Rails","kaigionrails"]
-published: false
+published: true
 ---
 
 2023/10/27, 28 に行われた Kaigi on Rails の感想です。
@@ -26,13 +26,10 @@ CRUDを主体としたRailsが得意とする設計について改めて学習�
 外部キー制約が原因でそのままではデータを投入できないという問題への対応や
 実行のたびに発生する問題に対して1つずつ解決していく様子が参考になりました.
 
-dumpファイルでのバックアップでも対応できるというコメントを終了後にXで見かけて、
-その通りだと思いました。
-
 ### [32個のPRでリリースした依存度の高いコアなモデルの安全な弄り方](https://speakerdeck.com/shoheimitani/32ge-noprderirisusitayi-cun-du-nogao-ikoanamoderunoan-quan-nanong-rifang)
 
 まずオンラインDDLをこれまで理解していなかったのでその点で勉強になりました。
-(当たり前のようにオンラインだと思っていました)
+(必ずオンラインで実行されると思っていました)
 加えてリリースに向けて注意すべき点を整理し、対応策を考案した上で
 実際にリリースしていく様子が勉強になりました。
 
@@ -48,7 +45,7 @@ dumpファイルでのバックアップでも対応できるというコメン�
 ### [コードカバレッジ計測ツールを導入したらテストを書くのが楽しくなった話](https://speakerdeck.com/duckfalcon/kodokabaretuziji-ce-turuwodao-ru-sitaratesutowoshu-kunogale-sikunatutahua)
 
 コードカバレッジを測定することの重要性はしばしば目にしていましたが、
-実際に可視化するとどのような影響があるのかを知ることができました。
+実際に可視化することでどのような効果をもたらすのかを知ることができました。
 テストを書く意味は理解されているので、
 長い眼でカバレッジを意識していくことが重要だと感じました。
 
@@ -71,38 +68,22 @@ Railsを学習する際に次の記事で例外処理を学習しました。
 勉強することができました。
 
 ### [Fat_Modelを解消するためのCQRSアーキテクチャ](https://speakerdeck.com/krpk1900/fat-modelwojie-xiao-surutamenocqrsakitekutiya)
+
 Fat_ControllerやFat_Modelへの対応方法として勉強になりました。
 責務を明確にしてテストを書きやすくする点は魅力的に思いました。
 ただ、今回初めて見たアーキテクチャだったので
 参考にしている書籍などがあれは教えてほしかったです。
 
 ### [管理機能アーキテクチャパターンの考察と実践 / Learn Architecture through Admin](https://speakerdeck.com/ohbarye/learn-architecture-through-admin)
+
 13枚目の「管理機能、後追いで作られがち」のスライドの状況がそのまま該当していて面白かったです。
 エンジニアがSQLを操作して保守対応している内容やユーザーが処理している内容を
 そのまま実装すればいいだろうと思っていましたが、
 今回の発表ではアーキテクチャの理論的な話から複数の解決策が実際には存在しており、
 状況に応じてどの解決策がベストかを考える必要があることを学びました。
-同時に現在実装されている管理機能はアンチパターンに該当することを再確認できました。
+同時に現在実装されている管理機能はアンチパターンに該当することを確認できました。
 
+### 参考
 
-## 10/28
-
-- [Fintechプロダクトの開発事情とアーキテクチャ解説 (スポンサーLT）](https://speakerdeck.com/yutadayo/kaigi-on-rails-2023-sponsor-lt)
-- [Railsの型ファイル自動生成における課題と解決](https://speakerdeck.com/ksss/railsnoxing-huairuzi-dong-sheng-cheng-niokeruke-ti-tojie-jue)
-- [事業の試行錯誤を支える、コードを捨てやすくしてシステムをシンプルに保つ設計と工夫](https://speakerdeck.com/zuckey_17/shi-ye-noshi-xing-cuo-wu-wozhi-eru-kodowoshe-teyasukusite-sisutemuwosinpurunibao-tushe-ji-togong-fu)
-- [Fat Modelを解消するためのCQRSアーキテクチャ](https://speakerdeck.com/krpk1900/fat-modelwojie-xiao-surutamenocqrsakitekutiya)
-- [返金処理を通して学ぶ、カード決済電文の沼バトル](https://speakerdeck.com/hirotea/numa-battle-of-card-transactions)
-- [E2E testing on Rails 2023](https://speakerdeck.com/yusukeiwaki/kaigionrails2023pub)
-- 
-- テーブル分割で実現するdeviseの責務の分離と柔軟な削除機構
-- Multiple Databasesを用いて2つのRailsプロジェクトを統合する
-- [Hotwire的な設計を追求して「Web紙芝居」に行き着いた話](https://speakerdeck.com/nay3/hotwirede-nashe-ji-wozhui-qiu-site-webzhi-zhi-ju-nixing-kizhao-itahua)
-- [管理機能アーキテクチャパターンの考察と実践](https://speakerdeck.com/ohbarye/learn-architecture-through-admin)
-- [APMをちゃんと使おうとしたら、いつのまにか独自gemを作っていた話](https://slides.com/kokuyouwind/kaigi_on_rails_2023)
-- [自分の道具を自作してつくる喜びを体感しよう、Railsで。 〜4年続いたPodcastを実例に〜](https://speakerdeck.com/mktakuya/kaigi-on-rails-2023)
-- 
-- 数十億のレコードを持つ5年目サービスの設計と障害解決
-- Railsアプリにパスワードレス認証を導入した知見
-- ActiveSupport::CurrentAttributes: すっごく便利なのに嫌われ者？！
-- 
-- Hotwireを使って管理画面を簡単にプチSPA化する
+発表資料をまとめてくださっている方がいらっしゃいました。
+[【Kaigi on Rails 2023】発表資料まとめ](https://qiita.com/Hassan/items/9cc836dd5bfb1aaaabac)
