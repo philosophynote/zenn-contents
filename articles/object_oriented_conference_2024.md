@@ -3,11 +3,11 @@ title: "【イベント参加レポート】Object-Oriented Conference 2024"
 emoji: "💊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["オブジェクト指向","ドメイン駆動設計","設計","ooc"]
-published: false
+published: true
 ---
 
 2024/3/24に開催された[Object-Oriented Conference 2024](https://ooc.dev/2024/) の感想です。
-普段Rubyを使用して開発しているにも関わらず、
+Rubyを普段使用して開発しているにも関わらず、
 オブジェクト指向に関する知識が不足していたため
 良いきっかけになればと思い、参加しました。
 
