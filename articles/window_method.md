@@ -3,7 +3,7 @@ title: "【備忘録】ウィンドウ関数の活用例"
 emoji: "🪟"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["SQL","MySQL"]
-published: false
+published: true
 ---
 
 仕事でBIツール [MetaBase](https://www.metabase.com/)を使用し、
@@ -42,7 +42,7 @@ SELECT
 FROM LoadSample;
 ```
 
-(参考書籍 「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章のSQL文にPARTITION BY句を追加)
+（参考書籍「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章のSQL文にPARTITION BY句を追加）
 
 `server_id`(サーバー)ごとの評価点数の過去1週間の移動平均を取得するクエリです。
 `PARTITION BY`句で`server_id`ごとにデータを分割（①）し、
@@ -76,7 +76,7 @@ FROM LoadSample;
 | UNBOUNDEDFOLLOWING | 無制限に下るほうへ移動する                                        |
 | CURRENTROW         | 現在行                                                            |
 
-(参考書籍「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章より引用)
+（参考書籍「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章より引用）
 
 ## 具体的な利用ケース
 
@@ -85,23 +85,23 @@ FROM LoadSample;
 
 ![ER図](/images/restaurant_er.png)
 
-restaurant_mastersテーブル
+### restaurant_mastersテーブル
 
 - name: 飲食店名
 
 ![restaurant_masters](/images/restaurant_masters.png)
 
-restaurant_ratingsテーブル
+### restaurant_ratingsテーブル
 
-- restaurant_master_id: 飲食店ID(restaurant_mastersテーブルの外部キー)
+- restaurant_master_id: 飲食店マスタID
 - rating_date: 評価日
 - rating_score: 評価点数
 
 ![restaurant_ratings](/images/restaurant_ratings.png)
 
-restaurant_eventsテーブル
+### restaurant_eventsテーブル
 
-- restaurant_master_id: 飲食店ID(restaurant_mastersテーブルの外部キー)
+- restaurant_master_id: 飲食店マスタID
 - content:ニュースや口コミの内容
 - event_date:発生日
 
@@ -131,12 +131,12 @@ FROM
     ) as after_score,
     event_date,
     rr.rating_date
-    from horecast_development.restaurant_ratings rr
+    from restaurant_ratings rr
     join restaurant_masters rm
     on rr.restaurant_master_id = rm.id
     join restaurant_events re
     on re.restaurant_master_id = rm.id
-  ) tmp
+  ) as events
 where rating_date = event_date 
 order by master_id;
 ```
@@ -168,7 +168,7 @@ FROM
 
 ### 3. ランキングを取得する
 
-飲食店ごとの評価点数のランキングを取得するクエリです。
+飲食店ごとの評価点数の順位を取得するクエリです。
 
 ```sql
 SELECT
