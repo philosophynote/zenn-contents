@@ -1,5 +1,5 @@
 ---
-title: "【備忘録】ウィンドウ関数を利用して時系列データを表現する"
+title: "【備忘録】ウィンドウ関数の活用例"
 emoji: "🪟"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["SQL","MySQL"]
@@ -9,7 +9,7 @@ published: false
 仕事でBIツール [MetaBase](https://www.metabase.com/)を使用し、
 非エンジニア向けにダッシュボードやエクセルのエクスポート機能を提供しています。
 
-最近、以下のような要望が続いたため、ウィンドウ関数を使った時系列データの表現方法を自分用にまとめました。
+最近、以下のような要望が続いたため、ウィンドウ関数の活用例を自分用にまとめました。
 
 - ある時点での最新のデータを1件表示してほしい
 - 折れ線グラフの変動が激しいので移動平均線が欲しい
@@ -32,22 +32,22 @@ published: false
 
 ```sql
 SELECT
-  restaurant_master_id,
-  rating_date,
-  rating_score,
-  AVG(rating_score) OVER (
-    PARTITION BY restaurant_master_id
-    ORDER BY rating_date
-    RANGE BETWEEN INTERVAL 6 DAY PRECEDING AND CURRENT ROW
-  ) AS moving_avg
-FROM
-  restaurant_ratings;
+  sample_date AS  cur_date,
+  MIN(sample_date)
+  OVER(
+    PARTITION BY server_id
+    ORDER BY sample_date ASC 
+    ROWS BETWEEN 1 PRECEDING AND 1 PRECEDING
+  ) AS latest_date
+FROM LoadSample;
 ```
 
-`restaurant_master_id`(飲食店のID)ごとの評価点数の過去1週間の移動平均を取得するクエリです。
-`PARTITION BY`句で`restaurant_master_id`ごとにデータを分割（①）し、
-`ORDER BY`句で`rating_date`で昇順に並べ替え（②）、
-`ROWS BETWEEN`句で直近7日間のデータを取得（③）しています。
+(参考書籍 「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章のSQL文にPARTITION BY句を追加)
+
+`server_id`(サーバー)ごとの評価点数の過去1週間の移動平均を取得するクエリです。
+`PARTITION BY`句で`server_id`ごとにデータを分割（①）し、
+`ORDER BY`句で`sample_date`で昇順に並べ替え（②）、
+`ROWS BETWEEN`句で範囲を指定（③）しています。
 
 ## 主なウィンドウ関数
 
@@ -76,14 +76,14 @@ FROM
 | UNBOUNDEDFOLLOWING | 無制限に下るほうへ移動する                                        |
 | CURRENTROW         | 現在行                                                            |
 
-(参考書籍より引用)
+(参考書籍「2 必ずわかるウィンドウ関数 フレーム句を使って違う行を自分の行に持ってくる」章より引用)
 
 ## 具体的な利用ケース
 
 飲食店の評価データを例に、ウィンドウ関数を利用したクエリを紹介します。
-データ内容はChatGPTによる架空のデータです。
+データ内容はChatGPTが作成した架空のデータです。
 
-![開発環境](/images/restaurant_er.png)
+![ER図](/images/restaurant_er.png)
 
 restaurant_mastersテーブル
 
@@ -141,6 +141,9 @@ where rating_date = event_date
 order by master_id;
 ```
 
+`range between interval 1 day following and interval 1 day following`で、
+出来事の直後のデータを取得しています。
+
 ![restaurant_event_study](/images/restaurant_event_study.png)
 
 ### 2. 移動平均を作成する
@@ -185,6 +188,7 @@ order by restaurant_master_id,rating_date asc
 
 ![restaurant_rank](/images/restaurant_rank.png)
 
-## 参考書籍
+## 参考書籍・URL
 
 - [達人に学ぶSQL徹底指南書 第2版 初級者で終わりたくないあなたへ](https://www.shoeisha.co.jp/book/detail/9784798157825)
+- [MySQL :: MySQL 8.0 リファレンスマニュアル :: 12.21 ウィンドウ関数](https://dev.mysql.com/doc/refman/8.0/ja/window-functions.html)
