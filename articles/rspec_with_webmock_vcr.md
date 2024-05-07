@@ -2,41 +2,31 @@
 title: "WEBMOCKとVCRの使い方"
 emoji: "📼"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Ruby","Rspec","vcr"]
+topics: ["Ruby","Rspec","vcr","webmock","テスト"]
 published: false
 ---
 
-## WEBMOCKとVCRの使い方
+外部と通信するタスクについてテストがほとんど書かれておらず、
+存在しているテストは実際のURLに毎回アクセスする記述となっていました。
 
-外部APIを呼び出す処理がある場合、
-テストを実行する度に外部と通信するのは避けたいところです。
-Rubyで開発する際にWebMockやVCRを使うことで、
-テスト時に外部APIと通信せず、
-事前に取得したレスポンスを再利用することができます。
-本記事では、WebMockとVCRを説明し、実際にOpenAIにアクセスするRubyクラスのRSpecを作成する方法を紹介します。
+次の記事に詳しく書かれているのですが、
+外部と通信する箇所こそテストが必要です。
 
-### Webmock
+https://qiita.com/jnchito/items/640f17e124ab263a54dd
 
-https://github.com/bblimke/webmock
+一方で実際のコードでテストの場合にダミーを返却させるために
+環境変数で値を切り替えたり、
+RSPEC内で`allow`を使用するなどして毎回外部と通信しないようにするのは
+コードの可読性が低下してしまいます。
 
-### VCR
-
-https://github.com/vcr/vcr
-
-## 「モック」と「スタブ」
-
-内容に入る前に、まず「モック」と「スタブ」の違いについて説明します。
-
-:::message
-モック：テスト対象システムからその依存に向かって行われる外部に向かうコミュニケーション（出力）を模倣し、そして、検証するのに使われる。
-
-スタブ：依存からテスト対象システムに向かって行われる内部に向かうコミュニケーション（入力）を模倣するのに使われる。
-:::
+この問題を解決するためにWebMockとVCRを使用したため、
+復習を兼ねてまとめておきます。
 
 ## サンプルコード
 
-RubyでOpenAIのAPIを叩くことができるGem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成します。
-Rubyのバージョンは3.2.2を使用しています。
+RubyでOpenAIのAPIを叩くことができるGem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成しました。
+サンプルなのでコードの記述は適当です。
+なお、Rubyのバージョンは3.2.2を使用しています。
 
 ```ruby
 class Openai
@@ -68,6 +58,8 @@ end
 
 ## WebMock
 
+https://github.com/bblimke/webmock
+
 Webmockは、テスト対象のコードが外部のWebサービスへ向けて送られるHTTPリクエストを実際には送らずにスタブとして模倣します。
 
 外部のWebサービスに実際にリクエストを送る代わりに、レスポンスをスタブ化することで、
@@ -83,21 +75,21 @@ Gemをinstallした後
 ```ruby
 require 'webmock/rspec'
 
+  config.before(:suite) do
+    WebMock.disable_net_connect!(
+      allow_localhost: true
+    )
+  end
 ```
 
-system_specなどでlocalhostにアクセスする場合、
-`spec/rails_helper.rb`に以下の設定を追加します。
+system_specなどでlocalhostにアクセスする必要があるため、
+`disable_net_connect!`に`allow_localhost: true`を追加します。
 ローカルホスト以外に特定のホストへのアクセスを許可する場合は、
 個別に設定を追加することができます。
 
-```ruby
-WebMock.disable_net_connect!(allow_localhost: true)
-WebMock.disable_net_connect!(allow: 'www.example.com')
-```
-
-stub_requestでリクエストをモックすることで、
+`stub_request`でリクエストをモックすることで、
 テスト時に外部APIと通信しないようになります。
-withでリクエストの条件を指定し、to_returnでレスポンスを指定します。
+`to_return`でレスポンスの内容を指定しています。
 
 ```ruby
 
@@ -119,25 +111,28 @@ end
 
 ```
 
+また、`with`を使用してリクエストの内容を指定することもできます。
+ここでの内容は送信するパラメータのだけではなく、
+ヘッダーなども指定することができます。
+
 このように、WebMockを使うことで、外部APIと通信せずにテストを実行することができます。
 しかしながら、テスト項目に対応する全てのレスポンスを記述する必要があるため、テスト内容が複雑になる可能性があります。
 
 ## VCR
 
-VCRは、実際のHTTPリクエストを記録し、その結果をキャッシュするGemです。
-後続のテストではキャッシュからレスポンスを読み込むので、実際にWebリクエストを発行する必要がありません。VCRを使えばリクエストとレスポンスを自動的に再現できます。。
+https://github.com/vcr/vcr
 
-OpenAIのAPIキーのような機密情報を含むリクエストをキャッシュする場合、VCRのconfigに設定を記載することで、
-マスクしたい文字列にマスクをかけることができます。
-
-ただし上手くマスクできない場合もあるので、次の記事を参考にしてください。
-
-https://qiita.com/gotchane/items/c2c29c0063bd44246510
+VCRは、テストケースのHTTPリクエストの結果をYAMLやJSON形式で保存するGemです。
+１回記録するとそれ以降のテスト実行時には保存した結果からレスポンスを読み込むので、外部との通信を行わないまま、正確な状態でテストを実行することができます。
 
 ### 導入例
 
 Gemをinstallした後
 `spec_helper.rb`に以下の設定を追加します。
+
+OPENAIのAPIキーのような機密情報をリクエストに使用する場合、
+`filter_sensitive_data`を設定するようにしてください。
+そのままだと保存したレスポンス結果に機密情報が含まれてしまいます。
 
 ```ruby
 require 'vcr'
@@ -147,21 +142,76 @@ VCR.configure do |c|
   c.cassette_library_dir = "spec/vcr" # キャッシュの保存先
   c.hook_into :webmock # VCRの内部で利用するモックライブラリ
   c.configure_rspec_metadata! # :vcrをつけたテストケースでにVCRカセットを使用する
-  c.filter_sensitive_data("<OPENAI_ACCESS_TOKEN>") { ENV.fetch("OPENAI_ACCESS_TOKEN", nil) } #機密情報をマスクする 
+  c.filter_sensitive_data("<OPENAI_ACCESS_TOKEN>") { ENV.fetch("OPENAI_ACCESS_TOKEN", nil) } 
 end
 ```
 
-基本的な設定は以上です。
-細かい設定は公式ドキュメントを読むか使用目的に合わせて次のリンク先で確認してください。
+マスクされた機密情報
 
-### リクエスト・レスポンスを見やすく整形する
+![token](/images/masked_token.png)
 
-https://tech.actindi.net/2021/06/21/083000
+VCRを適用したいテストケースに`:vcr`メタデータをつけることで、
+VCRがHTTPリクエストを記録します。
 
-### カセットの更新条件を変更する
+```ruby
+  describe '.call', :vcr do
+    it "有効な内容が返ってくる" do       
+      response = Openai.call
+      expect(response.dig("choices", 0, "message", "content")).to eq "こんにちは！元気ですか？何かお手伝いできることがありますか？"
+    end
 
-https://qiita.com/kazuooooo/items/30971a40511ea48da4a2
+    it "アクセスエラー" do   
+```
 
-### ローカルホストなどの通信をVCRの対象外にする
+この状態で実行すると、`spec/vcr`ディレクトリにレスポンスが保存されます。
 
-https://shibaaa647.hatenablog.com/entry/2020/11/02/092936
+![vcr_filename](/images/vcr_filename.png)
+
+なお、後述する事情によりサンプルコードを一部書き換えています。
+
+```ruby
+  def call
+    @client.chat(parameters: {
+      model: OPENAI_MODEL,
+      temperature: RESPONSE_TEMPERATURE,
+      max_tokens: MAX_TOKEN,
+      messages:[{ role: "user", content: "こんにちは！"}],
+    })
+  rescue => e
+    "アクセスエラー"
+  end
+end
+```
+
+1回実行すると再度実行する際には、保存されたレスポンスを読み込んでテストを実行するため
+高速でテストが終了します。
+記録した内容を更新する際には削除して再度記録すれば良いです。
+
+## まとめ
+今回はWebMockとVCRを使用した通信する箇所のテスト作成を行いました。
+内容が正確であることを確認するためには、
+VCRを使用してカセットとして内容を記録することが有効だと思いましたが、
+発生し得るエラーを意図的に発生させることが難しく、
+記録できないことがあるため、WebMockを併用することで対応することも視野に入れておくと良いと思いました。
+
+外部APIと通信する際に使用するケースを想定して記述しましたが、
+内部APIやスクレイピングなどのコードでも使用することができるので様々な場面で活用できます。
+
+## 参考記事
+
+### WebMock
+- [WebMockでリクエストの値そのものも見たいときはwithに内容を指定する](https://shinkufencer.hateblo.jp/entry/2018/12/10/000000)
+- [WebMockでパラメータによって成功時のリクエストと失敗時のレスポンスのモックを分ける](https://shinkufencer.hateblo.jp/entry/2018/12/11/233000)
+- 
+
+### VCR
+
+- [公式ドキュメント](https://benoittgt.github.io/vcr/#/)
+- [VCR 設定 Tips](https://tech.actindi.net/2021/06/21/083000)
+  - リクエスト・レスポンスを見やすく整形する
+- [VCRを使って開発中にあほみたいにリクエストを飛ばさないようにする](https://qiita.com/kazuooooo/items/30971a40511ea48da4a2)
+  - カセットの更新条件を変更する
+- [RSpecでWebMockとVCRを使ったテストを書く](https://shibaaa647.hatenablog.com/entry/2020/11/02/092936)
+  - ローカルホストなどの通信をVCRの対象外にする
+- [VCR で外部 API へのリクエストをダンプするときに機密情報をマスクしたい](https://qiita.com/gotchane/items/c2c29c0063bd44246510)
+  - 機密情報のマスク
