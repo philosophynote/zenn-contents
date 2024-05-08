@@ -14,7 +14,7 @@ published: false
 
 https://qiita.com/jnchito/items/640f17e124ab263a54dd
 
-一方で実際のコードでテストの場合にダミーを返却させるために
+一方で実際のコードでスタブを返却させるために
 環境変数で値を切り替えたり、
 RSPEC内で`allow`を使用するなどして毎回外部と通信しないようにするのは
 コードの可読性が低下してしまいます。
@@ -24,9 +24,11 @@ RSPEC内で`allow`を使用するなどして毎回外部と通信しないよ�
 
 ## サンプルコード
 
-RubyでOpenAIのAPIを叩くことができるGem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成しました。
+RubyでOpenAIのAPIを叩くことができる
+Gem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成しました。
 サンプルなのでコードの記述は適当です。
 なお、Rubyのバージョンは3.2.2を使用しています。
+また、同じレポジトリ内でRailsのアプリケーションが動作しているものとします。
 
 ```ruby
 class Openai
@@ -51,7 +53,7 @@ class Openai
       messages:[{ role: "user", content: "こんにちは！"}],
     })
   rescue => e
-    "エラーです" if e.response[:status] == 500
+    "エラー"
   end
 end
 ```
@@ -62,10 +64,8 @@ https://github.com/bblimke/webmock
 
 Webmockは、テスト対象のコードが外部のWebサービスへ向けて送られるHTTPリクエストを実際には送らずにスタブとして模倣します。
 
-外部のWebサービスに実際にリクエストを送る代わりに、レスポンスをスタブ化することで、
+レスポンスをスタブ化することで、
 テストの安定性と速度を向上させることができます。
-
-しかし、すべてのリクエストに対するレスポンスをコード内に記述する必要があります。
 
 ### 導入例
 
@@ -75,11 +75,11 @@ Gemをinstallした後
 ```ruby
 require 'webmock/rspec'
 
-  config.before(:suite) do
-    WebMock.disable_net_connect!(
-      allow_localhost: true
-    )
-  end
+config.before(:suite) do
+  WebMock.disable_net_connect!(
+    allow_localhost: true
+  )
+end
 ```
 
 system_specなどでlocalhostにアクセスする必要があるため、
