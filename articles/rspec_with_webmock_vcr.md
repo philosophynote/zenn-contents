@@ -6,7 +6,7 @@ topics: ["Ruby","Rspec","vcr","webmock","テスト"]
 published: false
 ---
 
-外部と通信するタスクについてテストがほとんど書かれておらず、
+外部と通信するコードについてテストがほとんど書かれておらず、
 存在しているテストは実際のURLに毎回アクセスする記述となっていました。
 
 次の記事に詳しく書かれているのですが、
@@ -16,7 +16,7 @@ https://qiita.com/jnchito/items/640f17e124ab263a54dd
 
 一方で実際のコードでスタブを返却させるために
 環境変数で値を切り替えたり、
-RSPEC内で`allow`を使用するなどして毎回外部と通信しないようにするのは
+RSPEC内で`allow`を使用して毎回外部と通信しないようにするのは
 コードの可読性が低下してしまいます。
 
 この問題を解決するためにWebMockとVCRを使用したため、
@@ -52,7 +52,7 @@ class Openai
       max_tokens: MAX_TOKEN,
       messages:[{ role: "user", content: "こんにちは！"}],
     })
-  rescue => e
+  rescue
     "エラー"
   end
 end
@@ -95,16 +95,30 @@ system_specなどでlocalhostにアクセスする必要があるため、
 
 RSpec.describe Openai, type: :services do
   describe '.call' do
-    it "有効な内容が返ってくる" do
-      stub_request(:post, "https://api.openai.com/v1/chat/completions").to_return(status: 200, body: "こんにちは！")        
+    it "有効な内容が返ってくる" do     
+      stub_request(:post, 
+        "https://api.openai.com/v1/chat/completions"
+      ).to_return(status: 200, body: {"id"=>"chatcmpl-hoge",
+        "object"=>"chat.completion",
+        "created"=>1715411192,
+        "model"=>"gpt-3.5-turbo-0125",
+        "choices"=>
+          [{"index"=>0,
+            "message"=>{"role"=>"assistant", "content"=>"こんにちは！元気ですか？何かお手伝いできることがありますか？"},
+            "logprobs"=>nil,
+            "finish_reason"=>"stop"}],
+        "usage"=>{"prompt_tokens"=>9, "completion_tokens"=>24, "total_tokens"=>33},
+        "system_fingerprint"=>nil}.to_json , headers: {})
       response = Openai.call
-      expect(response).to eq "こんにちは！"
+      expect(JSON.parse(response).dig("choices", 0, "message", "content")).to eq "こんにちは！元気ですか？何かお手伝いできることがありますか？"
     end
 
     it "アクセスエラー" do
-      stub_request(:post, "https://api.openai.com/v1/chat/completions").to_return(status: 500, body: "エラーです")        
+      stub_request(:post, 
+        "https://api.openai.com/v1/chat/completions"
+      ).to_raise(StandardError)
       response = Openai.call
-      expect(response).to eq "エラーです"
+      expect(response).to eq "エラー"
     end
   end
 end
