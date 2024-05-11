@@ -42,7 +42,7 @@ class Openai
   end
 
   def initialize(access_token)
-    @client = OpenAI::Client.new(access_token:)
+    @client = OpenAI::Client.new(access_token:, log_errors: true)
   end
 
   def call
@@ -125,12 +125,27 @@ end
 
 ```
 
-また、`with`を使用してリクエストの内容を指定することもできます。
-ここでの内容は送信するパラメータのだけではなく、
+`with`を使用してリクエストとして送信する内容を指定することもできます。
+ここでの内容は送信するパラメータだけではなく、
 ヘッダーなども指定することができます。
 
+また、to_returnの内容が多い場合は
+次のようにファイルに記述して読み込むこともできます。
+
+```ruby
+  File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
+
+  stub_request(:any, "www.example.com").
+    to_return(body: File.new('/tmp/response_body.txt'), status: 200)
+
+  Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+```
+
+https://github.com/bblimke/webmock?tab=readme-ov-file#response-with-body-specified-as-io-object
+
 このように、WebMockを使うことで、外部APIと通信せずにテストを実行することができます。
-しかしながら、テスト項目に対応する全てのレスポンスを記述する必要があるため、テスト内容が複雑になる可能性があります。
+しかしながら、テスト項目に対応する全てのレスポンスを記述する必要があるため、
+テスト内容が複雑になる可能性があります。
 
 ## VCR
 
@@ -181,27 +196,12 @@ VCRがHTTPリクエストを記録します。
 
 ![vcr_filename](/images/vcr_filename.png)
 
-なお、後述する事情によりサンプルコードを一部書き換えています。
-
-```ruby
-  def call
-    @client.chat(parameters: {
-      model: OPENAI_MODEL,
-      temperature: RESPONSE_TEMPERATURE,
-      max_tokens: MAX_TOKEN,
-      messages:[{ role: "user", content: "こんにちは！"}],
-    })
-  rescue => e
-    "アクセスエラー"
-  end
-end
-```
-
 1回実行すると再度実行する際には、保存されたレスポンスを読み込んでテストを実行するため
 高速でテストが終了します。
 記録した内容を更新する際には削除して再度記録すれば良いです。
 
 ## まとめ
+
 今回はWebMockとVCRを使用した通信する箇所のテスト作成を行いました。
 内容が正確であることを確認するためには、
 VCRを使用してカセットとして内容を記録することが有効だと思いましたが、
@@ -211,14 +211,14 @@ VCRを使用してカセットとして内容を記録することが有効だ�
 外部APIと通信する際に使用するケースを想定して記述しましたが、
 内部APIやスクレイピングなどのコードでも使用することができるので様々な場面で活用できます。
 
-## 参考記事
+## 使用する上で参考になりそうな記事
 
-### WebMock
+WebMock
+
 - [WebMockでリクエストの値そのものも見たいときはwithに内容を指定する](https://shinkufencer.hateblo.jp/entry/2018/12/10/000000)
 - [WebMockでパラメータによって成功時のリクエストと失敗時のレスポンスのモックを分ける](https://shinkufencer.hateblo.jp/entry/2018/12/11/233000)
-- 
 
-### VCR
+VCR
 
 - [公式ドキュメント](https://benoittgt.github.io/vcr/#/)
 - [VCR 設定 Tips](https://tech.actindi.net/2021/06/21/083000)
@@ -229,3 +229,6 @@ VCRを使用してカセットとして内容を記録することが有効だ�
   - ローカルホストなどの通信をVCRの対象外にする
 - [VCR で外部 API へのリクエストをダンプするときに機密情報をマスクしたい](https://qiita.com/gotchane/items/c2c29c0063bd44246510)
   - 機密情報のマスク
+
+その他
+[RSpecの技術的負債をチームで解消した話](https://www.lifull.blog/entry/2022/04/07/100000)
