@@ -3,7 +3,7 @@ title: "WEBMOCKとVCRの使い方"
 emoji: "📼"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Ruby","Rspec","vcr","webmock","テスト"]
-published: false
+published: true
 ---
 
 外部と通信するコードについてテストがほとんど書かれておらず、
@@ -24,8 +24,7 @@ RSPEC内で`allow`を使用して毎回外部と通信しないようにする�
 
 ## サンプルコード
 
-RubyでOpenAIのAPIを叩くことができる
-Gem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成しました。
+RubyでOpenAIのAPIを叩くことができるGem [ruby-openai](https://github.com/alexrudall/ruby-openai)を使用したサンプルコードを作成しました。
 サンプルなのでコードの記述は適当です。
 なお、Rubyのバージョンは3.2.2を使用しています。
 また、同じレポジトリ内でRailsのアプリケーションが動作しているものとします。
@@ -62,31 +61,14 @@ end
 
 https://github.com/bblimke/webmock
 
-Webmockは、テスト対象のコードが外部のWebサービスへ向けて送られるHTTPリクエストを実際には送らずにスタブとして模倣します。
+Webmockは、外部HTTPリクエストを実際には送らずにスタブとして模倣するためのGemです。
 
 レスポンスをスタブ化することで、
 テストの安定性と速度を向上させることができます。
 
 ### 導入例
 
-Gemをinstallした後
-`spec/rails_helper.rb`に以下の設定を追加します。
-
-```ruby
-require 'webmock/rspec'
-
-config.before(:suite) do
-  WebMock.disable_net_connect!(
-    allow_localhost: true
-  )
-end
-```
-
-system_specなどでlocalhostにアクセスする必要があるため、
-`disable_net_connect!`に`allow_localhost: true`を追加します。
-ローカルホスト以外に特定のホストへのアクセスを許可する場合は、
-個別に設定を追加することができます。
-
+実際のテストコードは次のようになります。
 `stub_request`でリクエストをモックすることで、
 テスト時に外部APIと通信しないようになります。
 `to_return`でレスポンスの内容を指定しています。
@@ -143,6 +125,22 @@ end
 
 https://github.com/bblimke/webmock?tab=readme-ov-file#response-with-body-specified-as-io-object
 
+また、system_specなどでlocalhostにアクセスする必要がある場合は
+`spec/rails_helper.rb`に次の設定を追加します。
+
+```ruby
+require 'webmock/rspec'
+
+config.before(:suite) do
+  WebMock.disable_net_connect!(
+    allow_localhost: true
+  )
+end
+```
+
+ローカルホスト以外に特定のホストへのアクセスを許可する場合は、
+個別に設定を追加することができます。
+
 このように、WebMockを使うことで、外部APIと通信せずにテストを実行することができます。
 しかしながら、テスト項目に対応する全てのレスポンスを記述する必要があるため、
 テスト内容が複雑になる可能性があります。
@@ -168,7 +166,7 @@ require 'vcr'
 require 'webmock/rspec'
 
 VCR.configure do |c|
-  c.cassette_library_dir = "spec/vcr" # キャッシュの保存先
+  c.cassette_library_dir = "spec/vcr" # 記録したカセットの保存先
   c.hook_into :webmock # VCRの内部で利用するモックライブラリ
   c.configure_rspec_metadata! # :vcrをつけたテストケースでにVCRカセットを使用する
   c.filter_sensitive_data("<OPENAI_ACCESS_TOKEN>") { ENV.fetch("OPENAI_ACCESS_TOKEN", nil) } 
@@ -179,7 +177,7 @@ end
 
 ![token](/images/masked_token.png)
 
-VCRを適用したいテストケースに`:vcr`メタデータをつけることで、
+VCRを適用したいテストケースに`:vcr`をつけることで、
 VCRがHTTPリクエストを記録します。
 
 ```ruby

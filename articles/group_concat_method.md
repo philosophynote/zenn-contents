@@ -3,13 +3,13 @@ title: "【備忘録】group concatメソッド"
 emoji: "🏘️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["SQL","MySQL"]
-published: false
+published: true
 ---
 
 仕事でBIツール [MetaBase](https://www.metabase.com/)を使用し、
 非エンジニア向けにダッシュボードやエクセルのエクスポート機能を提供しています。
 
-先日記事に紐づくタグを1行で表示してほしいという要望があり、
+情報に紐づくタグを1行で表示してほしいという要望があり、
 `group_concat`メソッドを使用したので使い方をまとめました。
 
 ## group_concatメソッドとは
@@ -21,10 +21,12 @@ mysqlの公式ドキュメントには次のように記載されています。
 https://dev.mysql.com/doc/refman/8.0/ja/aggregate-functions.html#function_group-concat
 
 ```sql
+
 GROUP_CONCAT([DISTINCT] expr [,expr ...]
              [ORDER BY {unsigned_integer | col_name | expr}
                  [ASC | DESC] [,col_name ...]]
              [SEPARATOR str_val])
+
 ```
 
 複数行のデータを1行で表したい場合に使用します。
@@ -44,7 +46,6 @@ ChatGPTに生成してもらった次のデータで動作を試します。
 
 ```sql
 
--- ブログ記事を格納するテーブル
 CREATE TABLE blog_posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -53,7 +54,6 @@ CREATE TABLE blog_posts (
     author VARCHAR(100)
 );
 
--- タグを格納するテーブル
 CREATE TABLE blog_post_tags (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT,
@@ -108,6 +108,6 @@ ChatGPTに設定を記憶させる「Memory」機能が
 
 https://www.itmedia.co.jp/news/articles/2404/30/news080.html
 
-記憶させると具体例を作成させる際に私の趣味嗜好を反映してくれるので、
-少し楽しいです
+記憶させると具体例を作成させる際に趣味嗜好を反映してくれるので、
+少し楽しいです。
 （もっと革新的な使い方が間違いなくあると思いますが...😅）
