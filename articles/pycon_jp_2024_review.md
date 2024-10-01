@@ -38,11 +38,19 @@ https://x.com/curekoshimizu/status/1839848263433982228
 
 ## Pythonを活用したLLMによる構造的データ生成の手法と実践
 
-https://speakerdeck.com/brainpadpr
+https://speakerdeck.com/brainpadpr/pyconjp2024
 
 ### 感想
 
+- LLMに回答を生成させるのではなく、コードを生成させてその結果を利用するというアプローチが面白かった
+- dataclassやPydanticを活用したデータ構造の工夫が参考になった
+- WASMの特性を活かしてセキュアな環境でPythonコードを実行するというアイデアが興味深かった
+- フォローアップ記事も楽しみにしている
+
 ### 参考
+
+- [Pydantic](https://pydantic-docs.helpmanual.io/)
+- 
 
 ## SQLModel入門 〜クエリと型〜
 
