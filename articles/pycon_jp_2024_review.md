@@ -2,7 +2,7 @@
 title: "【イベント参加レポート】PyCon JP 2024"
 emoji: "⛎"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Python"]
+topics: ["Python","LLM"]
 published: false
 ---
 
@@ -71,14 +71,6 @@ https://speakerdeck.com/delhi09/lambda-sqs-prod-knowledge
 ## プロダクションでのPython非同期ユースケース - Trio/Trio-Utilを中心に
 
 https://x.com/JunyaFff/status/1840217644403962259
-
-### 感想
-
-### 参考
-
-## pytest プラグインを開発して DRY に自動テストを書こう
-
-https://speakerdeck.com/inuatsu/pytest-puraguinwokai-fa-site-dry-nizi-dong-tesutowoshu-kou-c1a94f2c-e878-49e4-af46-b50e52d9eea1
 
 ### 感想
 
