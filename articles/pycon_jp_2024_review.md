@@ -3,7 +3,7 @@ title: "【イベント参加レポート】PyCon JP 2024"
 emoji: "⛎"
 type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["Python","LLM","カンファレンス","pyconjp"]
-published: false
+published: true
 ---
 
 2024/9/27, 28 に行われた PyCon JP 2024 の感想です。
@@ -35,7 +35,7 @@ https://x.com/curekoshimizu/status/1839848263433982228
 
 ### 参考
 
-- [math.fma]https://docs.python.org/ja/3.13/library/math.html#math.fma
+- [math.fma](https://docs.python.org/ja/3.13/library/math.html#math.fma)
 
 ## Pythonを活用したLLMによる構造的データ生成の手法と実践
 
