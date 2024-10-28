@@ -178,9 +178,9 @@ https://x.com/kaiba/status/1849729753865125982
 ### 参考
 - [maintenance_tasks](https://github.com/Shopify/maintenance_tasks)
 
-## omakaseしないためのrubocop.yml のつくりかた
+## [omakaseしないためのrubocop.yml のつくりかた](https://speakerdeck.com/linkers_tech/how-to-build-your-rubocop-dot-yml-to-avoid-omakase)
 
-https://x.com/expajp/status/1850071250003198135
+@[speakerdeck](76760eb56f3b40f2ba6594be71e60bf0)
 
 ### 感想
 
