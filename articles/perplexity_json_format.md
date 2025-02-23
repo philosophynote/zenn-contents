@@ -3,7 +3,7 @@ title: "Sonar APIの結果出力をJSON形式で取得する"
 emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Perplexity","LangChain","LLM","Sonar","生成 AI"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -107,16 +107,16 @@ body["choices"][0]["message"]["content"]
 ```python
 body["citations"]
 
-['https://www.radionikkei.jp/keiba_article/news/c_215.html',
- 'https://umanity.jp/sp/racedata/db/horse_top.php?code=2019104476',
- 'https://umatoku.hochi.co.jp/articles/20250222-OHT1T51240.html',
- 'https://s.keibabook.co.jp/cyuou/odds/5/202501040811',
- 'https://www.keibalab.jp/db/horse/2019104476/',
- 'https://db.netkeiba.com/horse/ped/2019104476/',
- 'https://www.sponichi.co.jp/gamble/news/2025/02/23/kiji/20250222s00004048383000c.html',
- 'https://s.keibabook.co.jp/cyuou/seiseki/202501040811',
- 'https://www.radionikkei.jp/keiba_article/news/s_600.html',
- 'https://umanity.jp/racedata/race_newsdet.php?nid=11841697']
+# ['https://www.radionikkei.jp/keiba_article/news/c_215.html',
+#  'https://umanity.jp/sp/racedata/db/horse_top.php?code=2019104476',
+#  'https://umatoku.hochi.co.jp/articles/20250222-OHT1T51240.html',
+#  'https://s.keibabook.co.jp/cyuou/odds/5/202501040811',
+#  'https://www.keibalab.jp/db/horse/2019104476/',
+#  'https://db.netkeiba.com/horse/ped/2019104476/',
+#  'https://www.sponichi.co.jp/gamble/news/2025/02/23/kiji/20250222s00004048383000c.html',
+#  'https://s.keibabook.co.jp/cyuou/seiseki/202501040811',
+#  'https://www.radionikkei.jp/keiba_article/news/s_600.html',
+#  'https://umanity.jp/racedata/race_newsdet.php?nid=11841697']
 ```
 
 ## LangChainとの連携
@@ -248,23 +248,23 @@ json.loads(response.content)
 ```python
 response.additional_kwargs["citations"]
 
-['https://umatoku.hochi.co.jp/articles/20250222-OHT1T51240.html',
- 'https://www.radionikkei.jp/keiba_article/news/c_215.html',
- 'https://www.sponichi.co.jp/gamble/news/2025/02/23/kiji/20250222s00004048383000c.html',
- 'https://www.radionikkei.jp/keiba_article/news/s_600.html',
- 'https://news.netkeiba.com/?pid=news_view&no=289894',
- 'https://www.youtube.com/watch?v=bJAMWvB82ZM',
- 'https://www.youtube.com/watch?v=AoEKM4v3WPM',
- 'https://ja.wikipedia.org/wiki/%E3%82%AC%E3%82%A4%E3%82%A2%E3%83%95%E3%82%A9%E3%83%BC%E3%82%B9',
- 'https://tospo-keiba.jp/breaking_news/55433',
- 'https://db.netkeiba.com/horse/2019104476/']
+# ['https://umatoku.hochi.co.jp/articles/20250222-OHT1T51240.html',
+#  'https://www.radionikkei.jp/keiba_article/news/c_215.html',
+#  'https://www.sponichi.co.jp/gamble/news/2025/02/23/kiji/20250222s00004048383000c.html',
+#  'https://www.radionikkei.jp/keiba_article/news/s_600.html',
+#  'https://news.netkeiba.com/?pid=news_view&no=289894',
+#  'https://www.youtube.com/watch?v=bJAMWvB82ZM',
+#  'https://www.youtube.com/watch?v=AoEKM4v3WPM',
+#  'https://ja.wikipedia.org/wiki/%E3%82%AC%E3%82%A4%E3%82%A2%E3%83%95%E3%82%A9%E3%83%BC%E3%82%B9',
+#  'https://tospo-keiba.jp/breaking_news/55433',
+#  'https://db.netkeiba.com/horse/2019104476/']
 ```
 
 ## 注意点
 
 ### with_structured_outputを使用すると引用元が取得できない
 
-Pydanticのクラスをレスポンスとして受け取るには
+Pydanticのクラスをレスポンスとして受け取るための他の方法では
 `with_structured_output`メソッドがあります。
 この場合は次のような記述になります。
 
@@ -292,10 +292,13 @@ LangChainは開発スピードが速いので、バージョンに気をつけ�
 ## 終わりに
 
 LangChain経由でPerplexityのAPIの返答をJSON形式で受け取る方法を記載しました。
-LangChainを今回初めて本格的に触ったので他に良い方法があるかもしれないので、
+LangChainを今回初めて本格的に触りました。
+他に良い方法があるかもしれないので、
 コメントでご指摘いただけると幸いです。
 
 ## 参考
+
+文章中に触れたURL以外には次の記事を参考にしました。
 
 - [[LangChain] with_structured_output を使用して、Pydanticのクラスをレスポンスとして受け取る](https://zenn.dev/pharmax/articles/8ed156e9ec9a68)
 - [LangChain `with_structured_output` メソッドによる構造化データ抽出](https://zenn.dev/ml_bear/articles/cb07549ec52175)
