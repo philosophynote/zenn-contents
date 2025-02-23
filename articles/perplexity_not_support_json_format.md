@@ -1,8 +1,8 @@
 ---
 title: "Sonar APIの結果出力をJSON形式で取得する"
-emoji: "💸"
+emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["perplexity","LangChain","LLM"]
+topics: ["perplexity","LangChain","LLM","Sonar"]
 published: false
 ---
 
@@ -83,11 +83,31 @@ body["citations"]
 
 ## LangChainとの連携
 
-しかしながら、アプリケーションに組み込む際には
+アプリケーションに組み込む際には
 JSON形式で取得したいと考えました。
 
-そこでLangChainを利用して、
-Sonar APIの結果をJSON形式で取得することを試みました。
+perplexityのAPIのドキュメントを読むと`response_format`を指定することで
+JSON形式で取得できると記載されていましたが、
+Tier-3以上のメンバーしか利用できないとのことでした。
+
+https://docs.perplexity.ai/guides/structured-outputs
+
+Tier-3以上のメンバーになるためには
+$500の課金が必要です。
+
+https://docs.perplexity.ai/guides/usage-tiers
+
+JSON形式の出力のためだけに課金するのは少し高いと感じたため、
+LangChainを利用して、
+Sonar APIの結果をJSON形式で取得することを試みます。
+
+LangChainには`ChatPerplexity`クラスがあるのでこれを活用します。
+
+https://python.langchain.com/docs/integrations/chat/perplexity/
+
+https://python.langchain.com/api_reference/community/chat_models/langchain_community.chat_models.perplexity.ChatPerplexity.html
+
+実際に作成したPythonコードです
 
 ```python
 from pydantic import BaseModel, Field
@@ -185,9 +205,9 @@ response.additional_kwargs["citations"]
  'https://www.youtube.com/watch?v=JqIirPcSPyY']
 ```
 
-いくつか注意点です
+## 注意点
 
-1.output_parseを使用すると引用元が取得できない
+### output_parserを使用すると引用元が取得できない
 
 Pydanticを使用してJSONレスポンスの形式を固定化する際は
 次のように`with_structured_output`を使用して記述すべきです
@@ -207,6 +227,13 @@ https://github.com/langchain-ai/langchain/issues/28108
 また、今回は関係ありませんが、
 ChatPerplexityクラスが`with_structured_output`に対応したのは
 langchain-communityの0.3.18で最新版になります
-関連issue
-[ChatPerplexity does not implement bind_tools for structured output]
-(https://github.com/langchain-ai/langchain/issues/29357)
+
+https://github.com/langchain-ai/langchain/issues/29357
+
+バージョン管理には気をつけましょう
+
+## 参考
+
+- [[LangChain] with_structured_output を使用して、Pydanticのクラスをレスポンスとして受け取る](https://zenn.dev/pharmax/articles/8ed156e9ec9a68)
+- [LangChain `with_structured_output` メソッドによる構造化データ抽出](https://zenn.dev/ml_bear/articles/cb07549ec52175)
+- [LangChainのOutput Parserを試す](https://zenn.dev/kun432/scraps/6954f9d07316cb)
