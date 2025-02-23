@@ -14,14 +14,29 @@ https://www.perplexity.ai/ja/hub/blog/introducing-the-sonar-pro-api
 
 Perplexityは以前からAPIを提供していましたが、
 精度が良くないとの声が多く、触っていませんでした。
-今回Sonarがリリースされたことで、
-生成AI検索エンジンのAPIを実行できるようになりました。
+今回Sonarがリリースされたので
+試してみることにしました。
 
 ## 試してみる
 
-早速
+公式ドキュメントを元に試してみます。[^1]
+
+https://docs.perplexity.ai/api-reference/chat-completions
+
+[^1]: OpenAI公式のライブラリ経由でも使用できます。https://docs.perplexity.ai/guides/getting-started#make-your-api-call
 
 ```python
+
+import requests
+from dotenv import load_dotenv
+import os
+import json
+
+load_dotenv()
+
+PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions"
+PERPLEXITY_API_KEY = os.environ["PERPLEXITY_API_KEY"]
+
 system_prompt = """
   You operate as a “Horse Racing Information Assistant”. 
   Your main task is to collect user-supported information on the web about your target races.
@@ -60,33 +75,37 @@ response = requests.request("POST", PERPLEXITY_API_URL, json=payload, headers=he
 body = json.loads(response.text)
 ```
 
+回答の文章は次のようになりました。
+
 ```python
 body["choices"][0]["message"]["content"]
 
-'ガイアフォースについての情報は以下の通りです:\n\n- 馬名: ガイアフォース\n- レースの馬番: 1番\n- 騎手名: 長岡騎手\n- 調教師名: 杉山晴紀調教師\n\nポジティブな意見:\n- 昨年のフェブラリーステークスで2着と好成績を残している[1][8]\n- 東京コースでは4戦してすべて掲示板に乗る安定感がある[4]\n- 芝・ダートを問わずG1レースのワンターンマイルコースの巧者[8]\n- 調教の動きが良く、仕上がりに関して調教師が満足している[3]\n- 骨瘤の影響は全くなく、状態は前走と変わらない[3]\n\nネガティブな意見:\n- 最後に勝ったのが3歳のセントライト記念で、勝ち星から遠ざかっている[6]\n- 前走のチャンピオンズカップは4コーナーを回る器用さが求められるコースで、半年ぶりの故障明けだった[8]\n- 初速がなかなかつかない馬で、位置取りは前に行きづらい[3]'
+'ガイアフォースの情報は以下の通りです：\n\n- 馬名: ガイアフォース\n- レースの馬番: 15番[4]\n- 騎手名: 長岡 禎仁[5]\n- 調教師名: 杉山晴紀（栗東）[2][5]\n\nポジティブな意見:\n- 昨年のフェブラリーステークスで2着と好成績を残している[3]\n- 東京のマイルコースが合うとされている[9]\n- 追い切りでは躍動感のある動きを見せている[1]\n- 調教師は馬の状態に自信を持っている[1]\n- 外枠を引いたことで囲まれることがなく、有利と考えられている[3]\n\nネガティブな意見:\n- 初速が遅く、前に行きづらい傾向がある[9]\n- 6歳馬となり、年齢的な衰えの可能性がある\n- 昨年と異なる調整過程を取っているため、仕上がりに不安がある[10]\n- 外枠を引いたことで、スタート後のポジション取りが難しくなる可能性がある'
 ```
+
+引用元も取得できます。
 
 ```python
 body["citations"]
 
-['https://s.keibabook.co.jp/cyuou/odds/4/202501040811',
- 'https://www.radionikkei.jp/keiba_article/news/c_215.html',
+['https://www.radionikkei.jp/keiba_article/news/c_215.html',
+ 'https://umanity.jp/sp/racedata/db/horse_top.php?code=2019104476',
+ 'https://umatoku.hochi.co.jp/articles/20250222-OHT1T51240.html',
+ 'https://s.keibabook.co.jp/cyuou/odds/5/202501040811',
+ 'https://www.keibalab.jp/db/horse/2019104476/',
+ 'https://db.netkeiba.com/horse/ped/2019104476/',
+ 'https://www.sponichi.co.jp/gamble/news/2025/02/23/kiji/20250222s00004048383000c.html',
+ 'https://s.keibabook.co.jp/cyuou/seiseki/202501040811',
  'https://www.radionikkei.jp/keiba_article/news/s_600.html',
- 'https://www.sportingnews.com/jp/horse-racing/news/jra-2025-february-stakes-prediction/590c5b90c1a17a14eca110b5',
- 'https://spaia-keiba.com/news/detail/30812',
- 'https://www.radionikkei.jp/keiba_article/news/gi_14.html',
- 'https://news.netkeiba.com/?pid=news_view&no=289839',
- 'https://blog.goo.ne.jp/tokuchan_mht/e/b6fd2f5538f86d0487805797be62ebcf?fm=rss',
- 'https://www.keibalab.jp/db/race/202502230511/raceresult.html',
- 'https://db.netkeiba.com/horse/2019104476/']
+ 'https://umanity.jp/racedata/race_newsdet.php?nid=11841697']
 ```
 
 ## LangChainとの連携
 
-アプリケーションに組み込む際には
-JSON形式で取得したいと考えました。
+アプリケーションに組み込むことを考えると
+JSON形式で取得したいです。
 
-perplexityのAPIのドキュメントを読むと`response_format`を指定することで
+PerplexityのAPIのドキュメントを読むと`response_format`を指定することで
 JSON形式で取得できると記載されていましたが、
 Tier-3以上のメンバーしか利用できないとのことでした。
 
@@ -107,7 +126,7 @@ https://python.langchain.com/docs/integrations/chat/perplexity/
 
 https://python.langchain.com/api_reference/community/chat_models/langchain_community.chat_models.perplexity.ChatPerplexity.html
 
-実際に作成したPythonコードです
+実際に動かしたコードは次のようになりました。
 
 ```python
 from pydantic import BaseModel, Field
@@ -175,6 +194,12 @@ inputs = {
 
 response = chain.invoke(inputs)
 
+# AIMessage(content='{\n  "horse_name": "ガイアフォース",\n  "horse_number": 14,\n  "jockey": "長岡禎仁",\n  "trainer": "杉山晴紀",\n  "positive_opinions": [\n    "追い切りで躍動感のある動きを見せた[1]",\n    "昨年の2着馬で、リベンジに挑む[5]",\n    "具合が良く、寒い時期の歩様の硬さもない[5]",\n    "調教師は展開さえ噛み合えば十分勝ち負けになると考えている[3]",\n    "東京のマイルコースが合う[3]"\n  ],\n  "negative_opinions": [\n    "初速がなかなかつかない馬で、位置取りは前に行けない可能性がある[3]",\n    "勝ち星からはかなり離れている[1]"\n  ]\n}', additional_kwargs={'citations': ['https://www.radionikkei.jp/keiba_article/news/c_215.html', 'https://www.keibalab.jp/db/race/202502230511/syutsuba.html', 'https://www.radionikkei.jp/keiba_article/news/s_600.html', 'https://s.keibabook.co.jp/cyuou/odds/4/202501040811', 'https://hochi.news/articles/20250222-OHT1T51240.html', 'https://race.netkeiba.com/special/index.html?id=0019', 'https://db.netkeiba.com/horse/2019104476/', 'https://ja.wikipedia.org/wiki/%E3%82%AC%E3%82%A4%E3%82%A2%E3%83%95%E3%82%A9%E3%83%BC%E3%82%B9', 'https://race.netkeiba.com/race/shutuba.html?race_id=202505010811', 'https://www.youtube.com/watch?v=JqIirPcSPyY']}, response_metadata={}, id='run-781d7321-b706-4c62-a816-c19073b5a8c8-0')
+```
+
+contentの内部はjson形式の文字列になっているので`json.loads`で変換します。
+
+```python
 json.loads(response.content)
 ```
 
@@ -188,7 +213,10 @@ json.loads(response.content)
   'ストライドが大きくなっており、状態が良い[4]',
   '展開さえ噛み合えば十分勝ち負けになると調教師が評価している[4]'],
  'negative_opinions': ['初速がつかない馬で、位置取りが前に行きづらい[4]', 'ダート適性は完全には証明されていない[4]']}
- ```
+```
+
+`pydantic_parser`で定義したjson形式になっています。
+引用元は次のように取得できます。
 
 ```python
 response.additional_kwargs["citations"]
@@ -207,10 +235,11 @@ response.additional_kwargs["citations"]
 
 ## 注意点
 
-### output_parserを使用すると引用元が取得できない
+### ・output_parserを使用すると引用元が取得できない
 
-Pydanticを使用してJSONレスポンスの形式を固定化する際は
-次のように`with_structured_output`を使用して記述すべきです
+PydanticOutputParserをそのまま利用すると、レスポンスのmodel_extraに格納された引用元情報が取得できません。
+引用元情報を確実に取得するには、with_structured_outputメソッドを利用する必要があります。
+この場合は次のように設定してください。
 
 ```python
 llm = ChatPerplexity(
@@ -221,19 +250,20 @@ llm = ChatPerplexity(
 ).with_structured_output(schema=HorseInfo)
 ```
 
-しかしながら、引用元の取得が`response`のmodel_extra dictに格納されているため、output_parserを通していません
+しかしながら、この方法だと`response`の`model_extra dict`に格納されている引用元が取得できません。
+
 https://github.com/langchain-ai/langchain/issues/28108
 
-また、今回は関係ありませんが、
+### ・バージョン管理
+
 ChatPerplexityクラスが`with_structured_output`に対応したのは
-langchain-communityの0.3.18で最新版になります
+langchain-communityの0.3.18で最新版になります。
 
 https://github.com/langchain-ai/langchain/issues/29357
 
-バージョン管理には気をつけましょう
+LangChainと組み合わせる際にはバージョンに気をつけましょう。
 
 ## 参考
 
 - [[LangChain] with_structured_output を使用して、Pydanticのクラスをレスポンスとして受け取る](https://zenn.dev/pharmax/articles/8ed156e9ec9a68)
 - [LangChain `with_structured_output` メソッドによる構造化データ抽出](https://zenn.dev/ml_bear/articles/cb07549ec52175)
-- [LangChainのOutput Parserを試す](https://zenn.dev/kun432/scraps/6954f9d07316cb)
