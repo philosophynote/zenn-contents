@@ -2,7 +2,7 @@
 title: "【忘備録】ECRのライフサイクルポリシーを設定する"
 emoji: "💰"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["AWS","ECR"]
+topics: ["AWS","ECR","Github Actions"]
 published: false
 --- 
 
@@ -45,11 +45,30 @@ ECRの課金は主に以下の2つの要素で構成されています：
 データ受信/送信はECRへの転送/ECRからの転送を意味します。
 同一リージョン内のECRと他のサービス間で転送されるデータは無料です。
 
-## ライフサイクルポリシーの設定方法
+## ライフサイクルポリシー設定
 
-Github ActionsでECRにタグ付きでプッシュする設定をしました。
-今回はタグがついていないものは2つだけ残して、
-あとは削除するライフサイクルポリシーを設定します。
+### Github Actionsでタグを付ける
+
+ライフサイクルポリシーの条件はタグに基づいて設定することができます。
+ECRへのプッシュはGithub Actionsで行っているので、タグを付ける設定を行います。
+関係する部分のみ抜粋します。
+
+```yaml
+build-and-deploy:
+  env: 
+    AWS_REGION: ap-northeast-1
+    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+    IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+    IMAGE_HASH: ${{ github.sha }}
+
+  steps:
+    - name: Build & Push base image (ARM64)
+      with:
+        tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/base-image:${{ env.IMAGE_TAG }}-${{ env.IMAGE_HASH }}
+```
+
+`prod-`か`dev-`のタグを付けてECRにプッシュするように設定しました。
+バージョンを一意に識別するために、GitHubのコミットハッシュもタグに含めています。
 
 ### 設定手順
 
@@ -57,15 +76,9 @@ Github ActionsでECRにタグ付きでプッシュする設定をしました。
 2. 左メニューの「Lifecycle Policy」をクリック
 3. 「テストルールの編集」→「ルールを追加」と遷移
 4. 「ライフサイクルテストルールを作成」で内容を入力
-
 ![create_test_rule](/images/create_test_rule.png)
-
 5. 保存をクリックしてから「テストを実行」をクリックすると現時点での削除対象イメージが表示される
-
-![match_rule](/images/match_rule.png)
-
 6. 問題なければ「ライフサイクルポリシーとして適用」をクリックするとjsonが表示されるので確認して「保存」をクリック
-
 ![confirm_policy](/images/confirm_policy.png)
 
 ## 注意点
@@ -73,9 +86,9 @@ Github ActionsでECRにタグ付きでプッシュする設定をしました。
 当たり前ですが、ライフサイクルポリシー設定時は
 他のサービスでのECRのイメージの使用状況を確認しましょう。
 
-緊急対応でECSでECRのイメージのタグ番号を直書きで設定した際に
+緊急対応でECSでECRのイメージのタグ番号を直書きで設定した際に意図せずにポリシーが適用されてしまい、ECSのタスクが起動できなくなったことがあります。
+
 
 **参考資料**：
 
-- [AWS公式：Automate the cleanup of images by using lifecycle policies in Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html)
 - [AWS公式：Amazon ECR Pricing](https://aws.amazon.com/ecr/pricing/)
