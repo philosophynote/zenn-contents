@@ -46,7 +46,7 @@ published: false
 [tui]
 # ...何か設定...
 
-notify = ["/opt/homebrew/bin/python3", "/Users/naokitakahashi/.codex/notify.py"]
+notify = ["(pythonのパス)", "(任意のパス)/notify.py"]
 ```
 
 * これ、TOML 的には「`notify` は `[tui]` の配下」になります（`tui.notify`）。
@@ -72,7 +72,7 @@ Codex 側もこの罠を踏む人が多い前提で、公式サンプルに明�
 
 ```toml
 # ✅ root に置く（最初の [table] より前）
-notify = ["/opt/homebrew/bin/python3", "/Users/naokitakahashi/.codex/notify.py"]
+notify = ["(pythonのパス)", "(任意のパス)/notify.py"]
 
 [tui]
 # ...何か設定...
@@ -91,7 +91,7 @@ import sys
 import subprocess
 from datetime import datetime
 
-LOG = "/Users/naokitakahashi/.codex/notify.log"
+LOG = "(任意のパス)/notify.log"
 
 def main() -> int:
     with open(LOG, "a") as f:
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 例（※ 例は雰囲気、手元の環境に合わせて調整）：
 
 ```bash
-codex -c 'notify=["/opt/homebrew/bin/python3","/Users/naokitakahashi/.codex/notify.py"]' "test"
+codex -c 'notify=["(pythonのパス)","(任意のパス)/notify.py"]' "test"
 ```
 
 ---
