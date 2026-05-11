@@ -94,6 +94,16 @@ Worktree作成時に`ローカル環境`で設定したコマンドが実行さ�
 スレッドをフォアグラウンドに持っていく必要があります。
 スレッドヘッダーの Hand offをクリックし、移動先として Local を選択します。
 
+これによりCodexは、ワークツリーとlocal checkoutの間でスレッドを
+安全に移動するために必要なGit手順を処理します。
+また、スレッドを再びworktreeにhandoffすることも可能です。
+
+#### Codex-managed worktreeとpermanent worktree
+
+軽量で使い捨てを想定したCodex-managed worktree と、長期利用するpermanent worktreeがあります。
+Codex-managed worktreeは通常1 thread専用で、permanent worktreeは
+project sidebarの三点メニューから作成でき、自動削除されず複数threadを開始できます。
+
 ### ローカル環境
 
 Local environmentはworktree用のセットアップ手順や、
@@ -135,6 +145,48 @@ macOS、Windows、Linuxごとにセットアップスクリプトを定義する
 
 ## Claude Codeのワークツリーについて
 
+Claude Code Desktopでは、
+worktreeは既定でプロジェクト直下の`.claude/worktrees/ に保存されます。
+Settings → Claude Code の Worktree location で保存先を変更でき、
+worktree branch nameにprefixを付ける設定もできます。
+
+作業が終わったセッションをアーカイブすることでworktreeを削除することができます。
+また、PRがマージ、クローズされた後にセッションを自動アーカイブする設定もあります。
+
+`.env`などGit管理外だがworktreeで必要なファイルについては、
+プロジェクト直下に`.worktreeinclude`を置くことで新しいworktreeへコピーできます。
+
+### Worktreeに関する設定
+
+これはデスクトップ限定ではなくCLIも同様です。
+
+#### baseRef
+
+新しい worktrees がブランチする ref。
+`fresh`（デフォルト）は origin/<default-branch> からブランチして、
+リモートと一致するクリーンツリーを取得します。
+`head`は現在のローカル HEAD からブランチするため、
+プッシュされていないコミットとフィーチャーブランチの状態が worktree に存在します。
+
+#### symlinkDirectories
+
+メインリポジトリから各 worktree にシンボリックリンクするディレクトリ。
+`node_modules`や`.cache`のような大規模なディレクトリの重複を避け、
+通常のブランチとワークツリーで共有することができます。
+
+#### sparsePaths
+
+ワークツリーでチェックアウトするディレクトリを指定することができます。
+リストされたパスのみがディスクに書き込まれます。
+大規模なレポジトリで有効に働きます。
+
+
+により node_modules や .cache のような大きなdirectoryを各worktreeへsymlinkできます。また、worktree.sparsePaths により大規模monorepoで必要なpathだけをsparse-checkoutできます。
+
 ## 参考
 
 - [Git - git-worktree Documentation](https://git-scm.com/docs/git-worktree)
+- [Codex Worktrees](https://developers.openai.com/codex/app/worktrees)
+- [Local environments](https://developers.openai.com/codex/app/local-environments)
+- [Claude Code Desktop を使用する](https://code.claude.com/docs/ja/desktop)
+- [Claude Code の設定](https://code.claude.com/docs/ja/settings#worktree-%E8%A8%AD%E5%AE%9A)
