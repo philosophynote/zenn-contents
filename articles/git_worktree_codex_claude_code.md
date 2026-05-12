@@ -11,12 +11,12 @@ published: false
 Codex Appのワークツリー機能を有効に使用できていないので、
 git worktreeの概要理解から入り、
 機能を理解します。
-また、Claude Codeのデスクトップ版でも同様の機能があるため、
+また、Claude Codeのデスクトップ版でもワークツリー機能があるため、
 Codex Appとの差分について触れます。
 
-## git worktreeとは
+## git worktreeについて
 
-`git worktree` は、1つのGitリポジトリに複数の作業ツリーを紐づけて管理するためのコマンドです。
+`git worktree`は、1つのGitリポジトリに複数の作業ツリーを紐づけて管理するためのコマンドです。
 
 通常、1つのリポジトリで同時にチェックアウトできるブランチは1つです。
 別のブランチで作業したい場合は、`git switch` などでブランチを切り替える必要があります。
@@ -55,13 +55,13 @@ git worktree remove ../hotfix
 
 ## Codex AppのWorktreesについて
 
-Codexでは、worktreeを使うことで、
+Codex Appでは、worktreeを使うことで、
 同じプロジェクト内で複数の独立したタスクを実行しても、
 互いに干渉しないようにすることを可能にしています。
 
 定期的なタイミングで指定した処理を自動実行する[Automations](https://developers.openai.com/codex/app/automations)で実行される処理はWorktree上で実行されています。
 
-ユーザーが元々作ったcheckoutを Local checkout、
+ユーザーが元々作ったcheckoutをLocal checkout、
 Codexがそこから作成したGit worktreeを Worktree、
 LocalとWorktreeの間でthreadを移動する流れを Handoff と呼んでいます。
 
@@ -145,16 +145,16 @@ macOS、Windows、Linuxごとにセットアップスクリプトを定義する
 
 ## Claude Codeのワークツリーについて
 
-Claude Code Desktopでは、
-worktreeは既定でプロジェクト直下の`.claude/worktrees/ に保存されます。
-Settings → Claude Code の Worktree location で保存先を変更でき、
-worktree branch nameにprefixを付ける設定もできます。
+Claude Code DesktopでもCodex Appと同じようにローカル環境/ワークツリー/クラウド環境での実行を選ぶことが可能です。
+
+作成したworktreeは既定でプロジェクト直下の`.claude/worktrees/`に保存されますが、設定から保存場所は変更可能です。
+
+Codexと異なり、チェックアウトブランチとワークツリー間の連携を行うコマンドは存在しません。
+しかしながら、`.env`などGit管理外だがworktreeで必要なファイルについては、
+プロジェクト直下に`.worktreeinclude`を置くことで自動的に新しいworktreeへコピーすることができます。
 
 作業が終わったセッションをアーカイブすることでworktreeを削除することができます。
 また、PRがマージ、クローズされた後にセッションを自動アーカイブする設定もあります。
-
-`.env`などGit管理外だがworktreeで必要なファイルについては、
-プロジェクト直下に`.worktreeinclude`を置くことで新しいworktreeへコピーできます。
 
 ### Worktreeに関する設定
 
@@ -170,8 +170,8 @@ worktree branch nameにprefixを付ける設定もできます。
 
 #### symlinkDirectories
 
-メインリポジトリから各 worktree にシンボリックリンクするディレクトリ。
-`node_modules`や`.cache`のような大規模なディレクトリの重複を避け、
+メインリポジトリから各worktree にシンボリックリンクするディレクトリを設定できます。
+ファイルの複製は実行しないため、`node_modules`や`.cache`のような大規模なディレクトリの重複を避け、
 通常のブランチとワークツリーで共有することができます。
 
 #### sparsePaths
@@ -179,9 +179,6 @@ worktree branch nameにprefixを付ける設定もできます。
 ワークツリーでチェックアウトするディレクトリを指定することができます。
 リストされたパスのみがディスクに書き込まれます。
 大規模なレポジトリで有効に働きます。
-
-
-により node_modules や .cache のような大きなdirectoryを各worktreeへsymlinkできます。また、worktree.sparsePaths により大規模monorepoで必要なpathだけをsparse-checkoutできます。
 
 ## 参考
 
