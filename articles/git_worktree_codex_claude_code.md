@@ -136,7 +136,11 @@ Worktree を用いた開発ワークフローは、大きく次の2パターン�
 #### Worktree 上だけで作業する
 
 ワークツリー内で作業が完結できる場合は、
-スレッドヘッダーの `Create branch here` ボタンを使って Worktree をブランチ化できます。
+Codexの画面から Worktree をブランチ化できます。
+
+![](/images/codex_right_side_bar.png)
+
+![](/images/create_branch_here.png)
 
 そこから通常の開発フローと同じように、プルリクエスト作成まで進められます。
 
