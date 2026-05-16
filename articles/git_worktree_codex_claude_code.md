@@ -152,8 +152,10 @@ Codexの画面から Worktree をブランチ化できます。
 ワークツリーだけでは確認が難しい場合は、
 スレッドをフォアグラウンドに持っていく必要があります。
 
-その場合は、スレッドヘッダーの `Hand off` をクリックし、
+その場合は、Codexの画面からWorktree → ブランチに引き継ぐをクリックし、
 移動先として `Local` を選択します。
+
+![](/images/worktree_handoff.png)
 
 これにより Codex は、Worktree と Local checkout の間でスレッドを
 安全に移動するために必要な Git 手順を処理します。
