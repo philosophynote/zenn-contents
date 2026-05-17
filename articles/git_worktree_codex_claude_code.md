@@ -3,7 +3,7 @@ title: "Codex AppとClaude Code Desktopのワークツリー機能について"
 emoji: "🌲"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["git","worktree","codex","claudecode"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -39,10 +39,10 @@ UI や仕様は変わる可能性があるため、最新の挙動は公式ド�
 同じリポジトリを共有したまま、別ディレクトリに別ブランチの作業場所を作れます。
 
 ```bash
-git worktree add -b hotfix ../my-repo-worktrees/hotfix
+git worktree add -b hotfix-001 ../my-repo-worktrees
 ```
 
-この場合、`../my-repo-worktrees/hotfix` に `hotfix` ブランチ用の作業ツリーが作られます。
+この場合、`../my-repo-worktrees` に `hotfix-001` ブランチ用の作業ツリーが作られます。
 元のディレクトリで進めていた変更を退避せずに、
 別ディレクトリで修正作業を進められます。
 
@@ -71,11 +71,14 @@ git worktree add <path> <branch>
 ワークツリーで作業することができます。
 
 ```bash
+# 既存のブランチを別ディレクトリにチェックアウトする
+git worktree add ../my-repo-worktrees feature-001
+
 # 新しいブランチを作成して別ディレクトリにチェックアウトする
-git worktree add -b feature ../my-repo-worktrees/feature
+git worktree add -b feature-001 ../my-repo-worktrees
 
 # リモートブランチを元に別ディレクトリへ作業ツリーを作る
-git worktree add -b feature ../my-repo-worktrees/feature origin/feature
+git worktree add -b feature-001 ../my-repo-worktrees origin/feature-001
 ```
 
 #### removeコマンド
@@ -86,11 +89,11 @@ git worktree add -b feature ../my-repo-worktrees/feature origin/feature
 git worktree remove <path>
 ```
 
-先ほど緊急修正のためaddコマンドで作成した
-ワークツリーを削除する場合は次のコマンドになります
+先ほどaddコマンドで作成した
+ワークツリーを削除する場合は次のコマンドになります。
 
 ```bash
-git worktree remove ../my-repo-worktrees/hotfix
+git worktree remove ../my-repo-worktrees
 ```
 
 #### pruneコマンド
@@ -147,7 +150,7 @@ Worktree を用いた開発ワークフローは、大きく次の2パターン�
 #### Worktree 上だけで作業する
 
 ワークツリー内で作業が完結できる場合は、
-Codexの画面から Worktree をブランチ化できます。
+Codexの画面の Gitサイドバー から 「ブランチを作成」をクリックすることで Worktree をブランチ化できます。
 
 ![](/images/codex_right_side_bar.png)
 
@@ -160,7 +163,7 @@ Codexの画面から Worktree をブランチ化できます。
 ワークツリーだけでは確認が難しい場合は、
 スレッドをフォアグラウンドに持っていく必要があります。
 
-その場合は、Codexの画面からWorktree → ブランチに引き継ぐをクリックし、
+その場合は、GitサイドバーからWorktree → ブランチに引き継ぐをクリックし、
 移動先として `Local` を選択します。
 
 ![](/images/worktree_handoff.png)
