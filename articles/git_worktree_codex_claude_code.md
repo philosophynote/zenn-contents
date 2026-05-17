@@ -151,7 +151,7 @@ Codexの画面から Worktree をブランチ化できます。
 
 ![](/images/codex_right_side_bar.png)
 
-![](/images/create_branch_here.png)
+![](/images/create_new_branch.png)
 
 そこから通常の開発フローと同じように、プルリクエスト作成まで進められます。
 
