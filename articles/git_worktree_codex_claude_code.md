@@ -2,7 +2,7 @@
 title: "Codex AppとClaude Code Desktopのワークツリー機能について"
 emoji: "🌲"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["git","gitworktree","codex","claudecode"]
+topics: ["git","worktree","codex","claudecode"]
 published: false
 ---
 
@@ -230,8 +230,8 @@ Claude Code Desktop でも Codex App と同じように、
 作成したワークツリーは、既定でプロジェクト直下の `.claude/worktrees/` に保存されます。
 デフォルトでは、ワークツリーを作成するたびに
 プロジェクト内にワークツリー側の作業ディレクトリが増えていきます。
-
-ただし、設定画面の `Claude Code` → `ワークツリーの場所` から保存場所は変更できます。
+`.claude/worktrees/`を`.gitignore`に追加して Git の追跡対象外にする運用が必要です。
+また、設定画面の `Claude Code` → `ワークツリーの場所` から保存場所は変更可能です。
 
 ↓何も設定しない場合に増えていくワークツリー
 
@@ -335,7 +335,8 @@ Claude Code Desktop は、`.worktreeinclude` や worktree 設定によって、
 ## 参考
 
 - [Git - git-worktree Documentation](https://git-scm.com/docs/git-worktree)
-- [Codex Worktrees](https://developers.openai.com/codex/app/worktrees)
-- [Local environments](https://developers.openai.com/codex/app/local-environments)
-- [Claude Code Desktop を使用する](https://code.claude.com/docs/ja/desktop)
-- [Claude Code の設定](https://code.claude.com/docs/ja/settings#worktree-%E8%A8%AD%E5%AE%9A)
+- [OpenAI Developers | Codex Worktrees](https://developers.openai.com/codex/app/worktrees)
+- [OpenAI Developers | Local environments](https://developers.openai.com/codex/app/local-environments)
+- [Claude Code Docs | Claude Code Desktop を使用する](https://code.claude.com/docs/ja/desktop)
+- [Claude Code Docs | worktree を使用して並列セッションを実行する](https://code.claude.com/docs/ja/worktrees)
+- [Claude Code Docs | Claude Code の設定](https://code.claude.com/docs/ja/settings#worktree-%E8%A8%AD%E5%AE%9A)
