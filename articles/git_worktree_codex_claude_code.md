@@ -8,14 +8,15 @@ published: false
 
 ## はじめに
 
-Codexへの指示と人力での確認作業をアプリ内で完結できる点でCodex Appが気に入り、
-公開されてから日常的に利用しています。
-VSCODEを開かずに一日が終了することも多くなりました。
+Codexへの指示と人力での確認作業をアプリ内で完結できる点が気に入り、
+Codex Appを公開後から日常的に使っています。
+VS Codeを開かずに一日を終えることも増えました。
 
-一方でCodex Appのワークツリー機能を何度か使用していたものの、
+一方でCodex Appのワークツリー機能を何度か使用したものの、
 雰囲気で使用している面があり、機能理解が曖昧なままでした。
 
-また、最近Claude Code Desktopも使用を始めましたが、こちらにもワークツリー機能があります。
+また、Claude Code Desktopも最近利用し始めましたが、
+こちらにもワークツリー機能があります。
 Codex App と Claude Code Desktop の両方を触るなら、
 それぞれのワークツリーが何を解決していて、どこが違うのかを整理しておきたいです。
 
@@ -38,57 +39,68 @@ UI や仕様は変わる可能性があるため、最新の挙動は公式ド�
 同じリポジトリを共有したまま、別ディレクトリに別ブランチの作業場所を作れます。
 
 ```bash
-git worktree add -b hotfix ../my-repo-hotfix
+git worktree add -b hotfix ../my-repo-worktrees/hotfix
 ```
 
-この場合、`../my-repo-hotfix` に `hotfix` ブランチ用の作業ツリーが作られます。
+この場合、`../my-repo-worktrees/hotfix` に `hotfix` ブランチ用の作業ツリーが作られます。
 元のディレクトリで進めていた変更を退避せずに、
 別ディレクトリで修正作業を進められます。
 
-使い終わった作業ツリーは、次のように削除します。
+### コマンド
+
+#### listコマンド
+
+紐づいている作業ツリーの一覧を表示します。
+
+```bash
+git worktree list
+```
+
+#### addコマンド
+
+ワークツリーを新規作成します。
+
+```bash
+git worktree add <path> <branch>
+```
+
+`<path>`は新規ワークツリーが作成される場所、
+`<branch>`は checkout するブランチです。
+
+`-b`をつけることで新規ブランチを作成して
+ワークツリーで作業することができます。
+
+```bash
+# 新しいブランチを作成して別ディレクトリにチェックアウトする
+git worktree add -b feature ../my-repo-worktrees/feature
+
+# リモートブランチを元に別ディレクトリへ作業ツリーを作る
+git worktree add -b feature ../my-repo-worktrees/feature origin/feature
+```
+
+#### removeコマンド
+
+ワークツリーを削除します。
+
+```bash
+git worktree remove <path>
+```
+
+先ほど緊急修正のためaddコマンドで作成した
+ワークツリーを削除する場合は次のコマンドになります
 
 ```bash
 git worktree remove ../my-repo-hotfix
 ```
 
-### よく使う関連コマンド
+#### pruneコマンド
+
+手動でディレクトリを削除した場合など、
+壊れたworktreeを掃除します。
 
 ```bash
-# 紐づいている作業ツリーの一覧を表示する
-git worktree list
-
-# 既存ブランチを別ディレクトリにチェックアウトする
-git worktree add ../my-repo-feature feature
-
-# 新しいブランチを作成して別ディレクトリにチェックアウトする
-git worktree add -b feature ../my-repo-feature
-
-# リモートブランチを元に別ディレクトリへ作業ツリーを作る
-git worktree add -b feature ../my-repo-feature origin/feature
-
-# 作業ツリーを削除する
-git worktree remove ../my-repo-feature
-
-# ディレクトリを手動削除した後に残った管理情報を掃除する
 git worktree prune
-
-# 作業ツリーのパスを変更する
-git worktree move ../my-repo-feature ../my-repo-renamed
-
-# 外部ディスクなどにある作業ツリーが prune されないようにする
-git worktree lock ../my-repo-feature
-
-# lock した作業ツリーを解除する
-git worktree unlock ../my-repo-feature
 ```
-
-基本的には、追加は `git worktree add`、
-確認は `git worktree list`、
-削除は `git worktree remove` を使います。
-
-`git worktree prune` は、作業ツリーのディレクトリを手動で消してしまった場合などに、
-Git 側に残った不要な管理情報を整理するためのコマンドです。
-通常の削除では `rm -rf` ではなく、`git worktree remove` を使う方が安全です。
 
 ### 注意点
 
@@ -108,8 +120,7 @@ Codex App では `git worktree` を使うことで、
 同じプロジェクト内で複数の独立したタスクを実行しても、
 互いに干渉しにくい作業場所を用意できます。
 
-たとえば、定期的に指定した処理を自動実行する
-[Automations](https://developers.openai.com/codex/app/automations) では、
+たとえば、定期的に指定した処理を自動実行する[Automations](https://developers.openai.com/codex/app/automations) では、
 実行時に Worktree が作成されます。
 
 Codex App のドキュメントでは、ユーザーが元々作った checkout を `Local checkout`、
@@ -143,9 +154,6 @@ Codexの画面から Worktree をブランチ化できます。
 ![](/images/create_branch_here.png)
 
 そこから通常の開発フローと同じように、プルリクエスト作成まで進められます。
-
-注意点として、ワークツリーでブランチを作成した場合、
-そのブランチを他のワークツリーでチェックアウトすることはできません。
 
 #### スレッドを Local に Handoff する
 
