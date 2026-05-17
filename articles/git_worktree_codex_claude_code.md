@@ -283,41 +283,6 @@ worktree に存在します。
 
 大規模なリポジトリで、作業に必要なディレクトリだけを取り出したい場合に有効です。
 
-## Codex App と Claude Code Desktop の違い
-
-ここまでを整理すると、両者の違いは次のようになります。
-
-| 観点 | Codex App | Claude Code Desktop |
-| --- | --- | --- |
-| 既定の保存場所 | `CODEX_HOME/worktrees` | `.claude/worktrees/` |
-| 使い捨ての作業場所 | `Codex-managed worktree` | セッションごとの worktree |
-| 長期利用する作業場所 | `permanent worktree` | ワークツリーの保存場所を変更して運用 |
-| Git 管理外ファイルの扱い | `Local environment` の setup script で準備 | `.worktreeinclude` でコピー |
-| Local との行き来 | `Handoff` で移動できる | 確認した範囲では相当機能は見当たらない |
-| よく使う操作 | `Actions` でヘッダーから実行 | 設定ファイルで worktree の挙動を調整 |
-
-どちらも `git worktree` を使って作業場所を分ける点は同じです。
-ただし、Codex App は `Handoff` や `Local environment` によって、
-Codex の thread とローカル開発環境の往復を支援する色が強いと感じました。
-
-一方で Claude Code Desktop は、`.worktreeinclude`、`baseRef`、
-`symlinkDirectories`、`sparsePaths` など、
-ワークツリー作成時のファイル配置や参照元を細かく調整しやすい印象です。
-
-## 使い分けの考え方
-
-自分が使うなら、次のように分けると扱いやすそうです。
-
-- 一時的な調査や小さな修正は、Codex-managed worktree で試す
-- ローカルでの動作確認が必要になったら、Codex App の Handoff で Local に移す
-- 何度も使う検証環境は、Codex App の permanent worktree を使う
-- Claude Code Desktop では、`.worktreeinclude` や `symlinkDirectories` を使って必要なファイルを揃える
-- 大きなリポジトリでは、Claude Code の `sparsePaths` でチェックアウト範囲を絞る
-
-特に `.env` や依存関係の扱いは、素の `git worktree` でも AI エージェントの worktree でも詰まりやすいです。
-Worktree を使う前に、「Git 管理外のファイルをどう用意するか」を決めておくと、
-作業開始時の手戻りを減らせます。
-
 ## まとめ
 
 `git worktree` は、同じリポジトリから複数の作業場所を作るための Git の機能です。
