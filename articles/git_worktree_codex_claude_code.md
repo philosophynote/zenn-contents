@@ -15,7 +15,7 @@ VS Codeを開かずに一日を終えることも増えました。
 一方でCodex Appのワークツリー機能を何度か使用したものの、
 雰囲気で使用している面があり、機能理解が曖昧なままでした。
 
-また、Claude Code Desktopも最近利用し始めましたが、
+また、Claude Desktop アプリの Code タブで利用する Claude Code Desktop も最近利用し始めましたが、
 こちらにもワークツリー機能があります。
 Codex App と Claude Code Desktop の両方を触るなら、
 それぞれのワークツリーが何を解決していて、どこが違うのかを整理しておきたいです。
@@ -24,7 +24,7 @@ Codex App と Claude Code Desktop の両方を触るなら、
 Codex App と Claude Code Desktop のワークツリー機能を比較します。
 
 :::message
-Codex App と Claude Code Desktop の説明は、2026年5月16日時点で確認した内容です。
+Codex App と Claude Code Desktop の説明は、2026年5月17日時点で確認した内容です。
 UI や仕様は変わる可能性があるため、最新の挙動は公式ドキュメントも確認してください。
 :::
 
@@ -90,7 +90,7 @@ git worktree remove <path>
 ワークツリーを削除する場合は次のコマンドになります
 
 ```bash
-git worktree remove ../my-repo-hotfix
+git worktree remove ../my-repo-worktrees/hotfix
 ```
 
 #### pruneコマンド
@@ -111,7 +111,7 @@ Git で管理されているファイルがチェックアウトされます。
 たとえば、`node_modules/` のような依存関係の実体や、
 `.env` のような環境変数ファイルは、worktree を追加しても自動では用意されません。
 
-別の作業ツリーでアプリケーションを動かす場合は、
+別の作業ツリー上でアプリケーションを動かす場合は、
 依存関係のインストールや環境変数ファイルの準備を作業ツリーごとに行う必要があります。
 
 ## Codex App の Worktrees について
@@ -210,7 +210,7 @@ macOS、Windows、Linux ごとにセットアップスクリプトを定義で�
 
 ワークツリーのクリーンアップ時に自動実行するスクリプトを定義できます。
 
-上に掲載した画像の通り、2026年5月10日現在、
+上に掲載した画像の通り、2026年5月17日現在、
 Codex App の UI には存在しますが、
 公式ドキュメントには記載がありませんでした。
 
@@ -222,9 +222,10 @@ Codex App の UI には存在しますが、
 定義したアクションを実行すると、Codex アプリ上のターミナルで実行されます。
 こちらもプラットフォームごとに設定できます。
 
-## Claude Code Desktop のワークツリーについて
+## Claude Code Desktop（Claude Desktop の Code タブ）のワークツリーについて
 
-Claude Code Desktop でも Codex App と同じように、
+Claude Code Desktop は、Claude Desktop アプリ内の Code タブから利用します。
+ここでも Codex App と同じように、
 ローカル環境、ワークツリー、クラウド環境での実行を選ぶことができます。
 
 作成したワークツリーは、既定でプロジェクト直下の `.claude/worktrees/` に保存されます。
@@ -291,7 +292,8 @@ Codex App と Claude Code Desktop のワークツリー機能も、この考え�
 Codex App は、thread を Worktree と Local の間で動かす Handoff や、
 作業環境を整える Local environment が特徴です。
 
-Claude Code Desktop は、`.worktreeinclude` や worktree 設定によって、
+Claude Code Desktop は、Claude Desktop アプリの Code タブから利用でき、
+`.worktreeinclude` や worktree 設定によって、
 作成されるワークツリーの中身を調整しやすい点が特徴です。
 
 どちらを使う場合も、`.env` や依存関係のような Git 管理外ファイルは自動では揃わない前提で、
